@@ -9,6 +9,7 @@ import Foundation
 import SwiftUI
 import QRCode
 import Combine
+import SwiftData
 
 class QRCodeViewModel: ObservableObject {
     @Published var selectedType: QRCodeType = .link
@@ -19,10 +20,13 @@ class QRCodeViewModel: ObservableObject {
     private let savedCodesKey = "SavedQRCodes"
     private var cancellables = Set<AnyCancellable>()
 
+    // SwiftData model context (will be injected)
+    var modelContext: ModelContext?
+
     init() {
         self.qrContent = QRCodeContent(type: .link, data: .link(url: "https://"))
 
-        // Load saved codes from UserDefaults
+        // Load saved codes from UserDefaults (for backward compatibility)
         loadSavedCodes()
 
         // Set up observers for automatic content type switching
@@ -38,22 +42,66 @@ class QRCodeViewModel: ObservableObject {
         return QRCodeGenerator.generateQRCode(from: qrContent, with: qrStyle)
     }
 
-    // Save current QR code
+    // Save current QR code to SwiftData
     func saveCurrentQRCode(name: String) {
-        let newSavedCode = SavedQRCode(
-            name: name,
-            content: qrContent,
-            style: qrStyle
-        )
+        guard let modelContext = modelContext else {
+            // Fallback to UserDefaults if SwiftData is not available
+            saveLegacyQRCode(name: name)
+            return
+        }
 
-        savedCodes.append(newSavedCode)
-        saveToDisk()
+        let qrCodeModel = QRCodeModel(name: name, content: qrContent, style: qrStyle)
+        modelContext.insert(qrCodeModel)
+
+        do {
+            try modelContext.save()
+
+            // Update the published savedCodes for UI updates
+            loadQRCodesFromSwiftData()
+        } catch {
+            print("Error saving QR code to SwiftData: \(error)")
+            // Fallback to UserDefaults
+            saveLegacyQRCode(name: name)
+        }
+    }
+
+    // Load QR codes from SwiftData
+    func loadQRCodesFromSwiftData() {
+        guard let modelContext = modelContext else { return }
+
+        do {
+            let descriptor = FetchDescriptor<QRCodeModel>(sortBy: [SortDescriptor(\.dateCreated, order: .reverse)])
+            let qrModels = try modelContext.fetch(descriptor)
+
+            // Convert to SavedQRCode objects for compatibility with existing UI
+            savedCodes = qrModels.compactMap { $0.toSavedQRCode() }
+        } catch {
+            print("Error fetching QR codes from SwiftData: \(error)")
+        }
     }
 
     // Delete a saved QR code
     func deleteSavedQRCode(at indexSet: IndexSet) {
+        guard let modelContext = modelContext else {
+            // Fallback to UserDefaults
+            savedCodes.remove(atOffsets: indexSet)
+            saveToDisk()
+            return
+        }
+
+        for index in indexSet {
+            let qrCode = savedCodes[index]
+
+            // Find and delete the corresponding SwiftData model
+            let descriptor = FetchDescriptor<QRCodeModel>(predicate: #Predicate { $0.id == qrCode.id })
+            if let models = try? modelContext.fetch(descriptor), let model = models.first {
+                modelContext.delete(model)
+                try? modelContext.save()
+            }
+        }
+
+        // Update the local array for UI
         savedCodes.remove(atOffsets: indexSet)
-        saveToDisk()
     }
 
     // Load a saved QR code into the current editor
@@ -91,6 +139,19 @@ class QRCodeViewModel: ObservableObject {
         }
 
         qrContent = QRCodeContent(type: newType, data: currentData)
+    }
+
+    // Legacy methods for backward compatibility
+
+    private func saveLegacyQRCode(name: String) {
+        let newSavedCode = SavedQRCode(
+            name: name,
+            content: qrContent,
+            style: qrStyle
+        )
+
+        savedCodes.append(newSavedCode)
+        saveToDisk()
     }
 
     // Save to UserDefaults

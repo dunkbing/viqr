@@ -3,6 +3,7 @@
 //  viqr
 //
 //  Created by Bùi Đặng Bình on 13/3/25.
+//  Updated by Claude on 13/3/25.
 //
 
 import SwiftUI
@@ -14,7 +15,8 @@ import UniformTypeIdentifiers
 struct QRCodePreviewView: View {
     @ObservedObject var viewModel: QRCodeViewModel
     @State private var selectedExportFormat: QRCodeExportFormat = .png
-    @State private var showingSavePanel = false
+    @State private var exportFileName: String = "QRCode"
+    @State private var showingExportSheet = false
     @State private var showingShareSheet = false
     @State private var exportedFileURL: URL? = nil
 
@@ -80,21 +82,18 @@ struct QRCodePreviewView: View {
                 .pickerStyle(SegmentedPickerStyle())
                 .padding(.bottom)
 
-                // Save Button
+                // Export Button
                 Button(action: {
                     #if os(iOS)
-                    exportedFileURL = viewModel.exportQRCode(as: selectedExportFormat, named: "QRCode-\(Date().timeIntervalSince1970)")
-                    if exportedFileURL != nil {
-                        showingShareSheet = true
-                    }
+                    showingExportSheet = true
                     #else
-                    showingSavePanel = true
+                    showingExportSheet = true
                     #endif
                 }) {
-                    Text("Save")
+                    Text("Export")
                         .frame(maxWidth: .infinity)
                         .padding()
-                        .background(Color.blue)
+                        .background(Color.orange)
                         .foregroundColor(.white)
                         .cornerRadius(10)
                 }
@@ -103,14 +102,56 @@ struct QRCodePreviewView: View {
         }
         .padding()
         #if os(iOS)
+        .sheet(isPresented: $showingExportSheet) {
+            VStack(spacing: 20) {
+                Text("Export QR Code Image")
+                    .font(.headline)
+
+                // Preview
+                Image(uiImage: (try? qrDocument.uiImage(CGSize(width: 150, height: 150))) ?? UIImage())
+                    .resizable()
+                    .interpolation(.none)
+                    .scaledToFit()
+                    .frame(width: 150, height: 150)
+                    .background(Color.white)
+                    .cornerRadius(10)
+                    .shadow(radius: 2)
+
+                // Filename field
+                TextField("Filename", text: $exportFileName)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                    .padding(.horizontal)
+
+                HStack {
+                    Button("Cancel") {
+                        showingExportSheet = false
+                    }
+                    .foregroundColor(.red)
+
+                    Spacer()
+
+                    Button("Export") {
+                        exportedFileURL = viewModel.exportQRCode(as: selectedExportFormat, named: exportFileName)
+                        if exportedFileURL != nil {
+                            showingExportSheet = false
+                            showingShareSheet = true
+                        }
+                    }
+                    .disabled(exportFileName.isEmpty)
+                }
+                .padding()
+            }
+            .padding()
+            .presentationDetents([.height(350)])
+        }
         .sheet(isPresented: $showingShareSheet) {
             if let url = exportedFileURL {
                 ShareSheet(activityItems: [url])
             }
         }
         #else
-        .sheet(isPresented: $showingSavePanel) {
-            MacSavePanel(format: selectedExportFormat, viewModel: viewModel)
+        .sheet(isPresented: $showingExportSheet) {
+            MacExportPanel(viewModel: viewModel, isPresented: $showingExportSheet)
         }
         #endif
     }
@@ -131,45 +172,5 @@ struct ShareSheet: UIViewControllerRepresentable {
     }
 
     func updateUIViewController(_ uiViewController: UIActivityViewController, context: Context) {}
-}
-#else
-// macOS Save Panel
-struct MacSavePanel: NSViewRepresentable {
-    let format: QRCodeExportFormat
-    let viewModel: QRCodeViewModel
-
-    func makeNSView(context: Context) -> NSView {
-        let view = NSView()
-
-        DispatchQueue.main.async {
-            let savePanel = NSSavePanel()
-
-            if #available(macOS 12.0, *) {
-                let contentType: UTType
-                switch format {
-                case .png:
-                    contentType = UTType.png
-                case .svg:
-                    contentType = UTType(filenameExtension: "svg") ?? UTType.data
-                case .pdf:
-                    contentType = UTType.pdf
-                }
-
-                savePanel.allowedContentTypes = [contentType]
-            } else {
-                savePanel.allowedFileTypes = [format.fileExtension]
-            }
-
-            savePanel.nameFieldStringValue = "QRCode"
-
-            if savePanel.runModal() == .OK, let url = savePanel.url {
-                let _ = viewModel.exportQRCode(as: format, named: url.lastPathComponent)
-            }
-        }
-
-        return view
-    }
-
-    func updateNSView(_ nsView: NSView, context: Context) {}
 }
 #endif

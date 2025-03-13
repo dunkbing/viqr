@@ -6,13 +6,27 @@
 //
 
 import SwiftUI
+import SwiftData
 
 @main
 struct viqrApp: App {
+    // Set up SwiftData schema and container
+    let modelContainer: ModelContainer
+
+    init() {
+        do {
+            modelContainer = try ModelContainer(for: QRCodeModel.self)
+        } catch {
+            fatalError("Failed to create ModelContainer for QRCodeModel: \(error)")
+        }
+    }
+
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .environment(\.modelContext, modelContainer.mainContext)
         }
+        .modelContainer(modelContainer)
 #if os(macOS)
         .windowStyle(HiddenTitleBarWindowStyle())
         .commands {
@@ -26,6 +40,6 @@ struct viqrApp: App {
 
             SidebarCommands()
         }
-        #endif
+#endif
     }
 }

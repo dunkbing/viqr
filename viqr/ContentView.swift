@@ -6,15 +6,18 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct ContentView: View {
+    @Environment(\.modelContext) private var modelContext
+
     var body: some View {
 #if os(macOS)
-           MacOSContentView()
-               .frame(minWidth: 1000, minHeight: 600)
-           #else
-           iOSContentView()
-           #endif
+        MacOSContentView(modelContext: modelContext)
+            .frame(minWidth: 1000, minHeight: 600)
+#else
+        iOSContentView(modelContext: modelContext)
+#endif
     }
 }
 
