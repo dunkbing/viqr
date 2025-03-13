@@ -7,6 +7,9 @@
 
 import SwiftUI
 import QRCode
+#if swift(>=5.5) && canImport(UniformTypeIdentifiers)
+import UniformTypeIdentifiers
+#endif
 
 struct QRCodePreviewView: View {
     @ObservedObject var viewModel: QRCodeViewModel
@@ -141,8 +144,22 @@ struct MacSavePanel: NSViewRepresentable {
         DispatchQueue.main.async {
             let savePanel = NSSavePanel()
 
-            // Set file extension based on export format
-            savePanel.allowedFileTypes = [format.fileExtension]
+            if #available(macOS 12.0, *) {
+                let contentType: UTType
+                switch format {
+                case .png:
+                    contentType = UTType.png
+                case .svg:
+                    contentType = UTType(filenameExtension: "svg") ?? UTType.data
+                case .pdf:
+                    contentType = UTType.pdf
+                }
+
+                savePanel.allowedContentTypes = [contentType]
+            } else {
+                savePanel.allowedFileTypes = [format.fileExtension]
+            }
+
             savePanel.nameFieldStringValue = "QRCode"
 
             if savePanel.runModal() == .OK, let url = savePanel.url {
