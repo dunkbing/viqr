@@ -29,16 +29,28 @@ struct SavedQRDetailView: View {
                 // QR Code image
                 let qrDocument = QRCodeGenerator.generateQRCode(from: savedCode.content, with: savedCode.style)
                 #if canImport(UIKit)
-                if let cgImage = qrDocument.cgImage(CGSize(width: 250, height: 250)) {
-                    Image(uiImage: UIImage(cgImage: cgImage))
-                        .interpolation(.none)
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 250, height: 250)
-                        .background(Color.white)
-                        .cornerRadius(16)
-                        .shadow(radius: 2)
-                        .padding()
+                Group {
+                    if let cgImage = try? qrDocument.cgImage(CGSize(width: 250, height: 250)) {
+                        Image(uiImage: UIImage(cgImage: cgImage))
+                            .interpolation(.none)
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 250, height: 250)
+                            .background(Color.white)
+                            .cornerRadius(16)
+                            .shadow(radius: 2)
+                            .padding()
+                    } else {
+                        // Fallback if QR code generation fails
+                        Image(systemName: "qrcode")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 250, height: 250)
+                            .background(Color.white)
+                            .cornerRadius(16)
+                            .shadow(radius: 2)
+                            .padding()
+                    }
                 }
                 #else
                 // Fallback for non-UIKit platforms
@@ -173,8 +185,12 @@ struct SavedQRDetailView: View {
                     Spacer()
 
                     Button("Export") {
-                        // Create a new temporary QR generator to use the saved code's style
-                        exportedFileURL = viewModel.exportQRCode(as: selectedExportFormat, named: exportFileName)
+                        exportedFileURL = QRCodeGenerator.saveQRCodeToFile(
+                            qrCode: qrDocument,
+                            fileName: exportFileName,
+                            fileFormat: selectedExportFormat
+                        )
+
                         if exportedFileURL != nil {
                             showingExportSheet = false
                             showingShareSheet = true
@@ -185,7 +201,6 @@ struct SavedQRDetailView: View {
                 .padding()
             }
             .padding()
-            .presentationDetents([.height(400)])
         }
         .sheet(isPresented: $showingShareSheet) {
             if let url = exportedFileURL {

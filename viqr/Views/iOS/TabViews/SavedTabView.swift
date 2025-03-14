@@ -39,20 +39,30 @@ struct SavedTabView: View {
                 } else {
                     List {
                         ForEach(viewModel.savedCodes) { qrCode in
-                            // Fixed NavigationLink with explicit destination type
                             NavigationLink(destination: SavedQRDetailView(viewModel: viewModel, savedCode: qrCode)) {
                                 HStack {
                                     // Generate a small preview
-                                    let qrDocument = QRCodeGenerator.generateQRCode(from: qrCode.content, with: qrCode.style)
-                                    // This line is causing issues - let's use proper conversion method
+                                    let qrDocument = QRCodeGenerator.generateQRCode(
+                                        from: qrCode.content,
+                                        with: qrCode.style
+                                    )
                                     #if canImport(UIKit)
-                                    if let cgImage = qrDocument.cgImage(CGSize(width: 60, height: 60)) {
-                                        Image(uiImage: UIImage(cgImage: cgImage))
-                                            .interpolation(.none)
-                                            .resizable()
-                                            .frame(width: 60, height: 60)
-                                            .background(Color.white)
-                                            .cornerRadius(8)
+                                    Group {
+                                        if let cgImage = try? qrDocument.cgImage(CGSize(width: 60, height: 60)) {
+                                            Image(uiImage: UIImage(cgImage: cgImage))
+                                                .interpolation(.none)
+                                                .resizable()
+                                                .frame(width: 60, height: 60)
+                                                .background(Color.white)
+                                                .cornerRadius(8)
+                                        } else {
+                                            // Fallback if QR code generation fails
+                                            Image(systemName: "qrcode")
+                                                .resizable()
+                                                .frame(width: 60, height: 60)
+                                                .background(Color.white)
+                                                .cornerRadius(8)
+                                        }
                                     }
                                     #else
                                     // Fallback for non-UIKit platforms
@@ -114,19 +124,6 @@ struct SavedTabView: View {
         return formatter.string(from: date)
     }
 }
-
-#if os(iOS)
-struct ShareSheet: UIViewControllerRepresentable {
-    var items: [Any]
-
-    func makeUIViewController(context: Context) -> UIActivityViewController {
-        let controller = UIActivityViewController(activityItems: items, applicationActivities: nil)
-        return controller
-    }
-
-    func updateUIViewController(_ uiViewController: UIActivityViewController, context: Context) {}
-}
-#endif
 
 struct DetailRow: View {
     let label: String

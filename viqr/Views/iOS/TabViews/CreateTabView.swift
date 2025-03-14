@@ -3,7 +3,6 @@
 //  viqr
 //
 //  Created by Bùi Đặng Bình on 13/3/25.
-//  Updated by Claude on 13/3/25.
 //
 
 import SwiftUI
@@ -45,6 +44,8 @@ struct CreateTabView: View {
     @State private var qrCodeName = ""
     @State private var selectedExportFormat: QRCodeExportFormat = .png
     @State private var exportFileName = ""
+    @State private var showingShareSheet = false
+    @State private var exportedFileURL: URL? = nil
 
     var body: some View {
         NavigationView {
@@ -136,12 +137,18 @@ struct CreateTabView: View {
                 NavigationView {
                     iOSEditorView(viewModel: viewModel)
                         .navigationTitle("Edit Content")
+                        .navigationBarItems(trailing: Button("Done") {
+                            showingContentSheet = false
+                        })
                 }
             }
             .sheet(isPresented: $showingStyleSheet) {
                 NavigationView {
                     iOSStyleEditorView(viewModel: viewModel)
                         .navigationTitle("Edit Style")
+                        .navigationBarItems(trailing: Button("Done") {
+                            showingStyleSheet = false
+                        })
                 }
             }
             .sheet(isPresented: $showingSaveSheet) {
@@ -171,7 +178,6 @@ struct CreateTabView: View {
                     .padding()
                 }
                 .padding()
-                .presentationDetents([.height(200)])
             }
             .sheet(isPresented: $showingExportSheet) {
                 VStack(spacing: 20) {
@@ -181,16 +187,18 @@ struct CreateTabView: View {
                     // Preview
                     let qrDocument = viewModel.generateQRCode()
 
-//                    if let uiImage = try? qrDocument.uiImage(CGSize(width: 150, height: 150), dpi: 216) {
-//                        Image(uiImage: uiImage)
-//                            .resizable()
-//                            .interpolation(.none)
-//                            .scaledToFit()
-//                            .frame(width: 150, height: 150)
-//                            .background(Color.white)
-//                            .cornerRadius(10)
-//                            .shadow(radius: 2)
-//                    }
+                    #if canImport(UIKit)
+                    if let uiImage = try? qrDocument.uiImage(CGSize(width: 150, height: 150)) {
+                        Image(uiImage: uiImage)
+                            .resizable()
+                            .interpolation(.none)
+                            .scaledToFit()
+                            .frame(width: 150, height: 150)
+                            .background(Color.white)
+                            .cornerRadius(10)
+                            .shadow(radius: 2)
+                    }
+                    #endif
 
                     // Filename field
                     TextField("Filename", text: $exportFileName)
@@ -215,32 +223,23 @@ struct CreateTabView: View {
                         Spacer()
 
                         Button("Export") {
-                            exportQRCodeImage()
-                            showingExportSheet = false
+                            exportedFileURL = viewModel.exportQRCode(as: selectedExportFormat, named: exportFileName)
+                            if exportedFileURL != nil {
+                                showingExportSheet = false
+                                showingShareSheet = true
+                            }
                         }
                         .disabled(exportFileName.isEmpty)
                     }
                     .padding()
                 }
                 .padding()
-                .presentationDetents([.height(400)])
+            }
+            .sheet(isPresented: $showingShareSheet) {
+                if let url = exportedFileURL {
+                    ShareSheet(items: [url])
+                }
             }
         }
-    }
-
-    private func exportQRCodeImage() {
-        let exportedFileURL = viewModel.exportQRCode(as: selectedExportFormat, named: exportFileName)
-
-        // If we have a URL, show the share sheet
-//        if let url = exportedFileURL {
-//            let activityVC = UIActivityViewController(activityItems: [url], applicationActivities: nil)
-//
-//            // Find the active UIWindow to present from
-//            if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-//               let rootViewController = windowScene.windows.first?.rootViewController {
-//                activityVC.popoverPresentationController?.sourceView = rootViewController.view
-//                rootViewController.present(activityVC, animated: true)
-//            }
-//        }
     }
 }

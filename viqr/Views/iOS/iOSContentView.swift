@@ -6,21 +6,9 @@
 //
 
 import SwiftUI
-import SwiftData
 
 struct iOSContentView: View {
     @StateObject var viewModel = QRCodeViewModel()
-
-    init(modelContext: ModelContext) {
-        // Initialize the view model (must use _viewModel for StateObject)
-        let vm = QRCodeViewModel()
-        vm.modelContext = modelContext
-
-        // Load data from SwiftData on initialization
-        vm.loadQRCodesFromSwiftData()
-
-        _viewModel = StateObject(wrappedValue: vm)
-    }
 
     var body: some View {
         TabView {

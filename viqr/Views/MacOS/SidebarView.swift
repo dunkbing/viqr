@@ -8,6 +8,7 @@
 import SwiftUI
 import QRCode
 
+#if os(macOS)
 struct SidebarView: View {
     @ObservedObject var viewModel: QRCodeViewModel
     @State private var selection: String? = "create"
@@ -165,8 +166,9 @@ struct SavedQRCodeDetailView: View {
                     try data.write(to: url)
                 }
             } catch {
-                print("Error saving QR code: \(error)")
+                print("Error exporting QR code: \(error)")
             }
         }
     }
 }
+#endif

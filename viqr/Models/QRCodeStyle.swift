@@ -71,20 +71,20 @@ struct ColorComponents: Codable, Equatable {
         var alpha: CGFloat = 0
 
         #if canImport(UIKit)
-        if let cgColor = UIColor(color).cgColor {
-            let components = cgColor.components ?? [0, 0, 0, 0]
-            if components.count == 4 {
-                red = components[0]
-                green = components[1]
-                blue = components[2]
-                alpha = components[3]
-            } else if components.count == 2 {
-                // Grayscale
-                red = components[0]
-                green = components[0]
-                blue = components[0]
-                alpha = components[1]
-            }
+        let uiColor = UIColor(color)
+        let cgColor = uiColor.cgColor
+        let components = cgColor.components ?? [0, 0, 0, 0]
+        if components.count == 4 {
+            red = components[0]
+            green = components[1]
+            blue = components[2]
+            alpha = components[3]
+        } else if components.count == 2 {
+            // Grayscale
+            red = components[0]
+            green = components[0]
+            blue = components[0]
+            alpha = components[1]
         }
         #else
         let color = NSColor(color)
