@@ -172,11 +172,13 @@ struct QRCodePreviewView: View {
         @Binding var isPresented: Bool
         @State private var selectedFormat: QRCodeExportFormat = .png
         @State private var fileName: String = "QRCode"
+        @EnvironmentObject var themeManager: ThemeManager
 
         var body: some View {
             VStack(spacing: 20) {
                 Text("Export QR Code Image")
                     .font(.headline)
+                    .foregroundColor(Color.appText)
 
                 // Preview of the QR code
                 let qrDocument = viewModel.generateQRCode()
@@ -204,12 +206,14 @@ struct QRCodePreviewView: View {
                 }
                 .pickerStyle(SegmentedPickerStyle())
                 .frame(width: 300)
+                .accentColor(Color.appAccent)
 
                 HStack(spacing: 20) {
                     Button("Cancel") {
                         isPresented = false
                     }
                     .keyboardShortcut(.cancelAction)
+                    .foregroundColor(Color.appRed)
 
                     Button("Export") {
                         exportQRCode()
@@ -217,10 +221,12 @@ struct QRCodePreviewView: View {
                     }
                     .keyboardShortcut(.defaultAction)
                     .disabled(fileName.isEmpty)
+                    .foregroundColor(Color.appGreen)
                 }
                 .padding(.top)
             }
             .padding()
+            .background(Color.appBackground)
         }
 
         private func exportQRCode() {

@@ -110,8 +110,8 @@ class QRCodeViewModel: ObservableObject {
         qrContent = QRCodeContent(type: newType, data: currentData)
     }
 
-    // Save to UserDefaults
-    private func saveToDisk() {
+    // Save to UserDefaults - make this public so we can call it from settings
+    func saveToDisk() {
         if let encoded = try? JSONEncoder().encode(savedCodes) {
             UserDefaults.standard.set(encoded, forKey: savedCodesKey)
         }

@@ -11,32 +11,36 @@ import SwiftUI
 #if os(macOS)
     struct SidebarView: View {
         @ObservedObject var viewModel: QRCodeViewModel
-        @State private var selection: String? = "create"
+        @Binding var selection: String?
+        @EnvironmentObject var themeManager: ThemeManager
 
         var body: some View {
             List {
-                Section(header: Text("Create")) {
+                Section(header: Text("Create").foregroundColor(Color.appSubtitle)) {
                     NavigationLink(
-                        destination: EditorView(viewModel: viewModel),
+                        destination: EditorView(viewModel: viewModel)
+                            .environmentObject(themeManager),
                         tag: "create",
                         selection: $selection
                     ) {
                         Label("New QR Code", systemImage: "qrcode")
+                            .foregroundColor(Color.appText)
                     }
                 }
 
-                Section(header: Text("QR Code Types")) {
+                Section(header: Text("QR Code Types").foregroundColor(Color.appSubtitle)) {
                     ForEach(QRCodeType.allCases) { type in
                         HStack {
                             Image(systemName: type.icon)
                                 .frame(width: 24)
+                                .foregroundColor(Color.appAccent)
 
                             Button(action: {
                                 viewModel.selectedType = type
                                 selection = "create"
                             }) {
                                 Text(type.rawValue)
-                                    .foregroundColor(.primary)
+                                    .foregroundColor(Color.appText)
                             }
                             .buttonStyle(PlainButtonStyle())
                         }
@@ -44,10 +48,10 @@ import SwiftUI
                     }
                 }
 
-                Section(header: Text("Saved QR Codes")) {
+                Section(header: Text("Saved QR Codes").foregroundColor(Color.appSubtitle)) {
                     if viewModel.savedCodes.isEmpty {
                         Text("No saved QR codes")
-                            .foregroundColor(.gray)
+                            .foregroundColor(Color.appSubtitle)
                             .italic()
                     } else {
                         ForEach(viewModel.savedCodes) { qrCode in
@@ -57,17 +61,19 @@ import SwiftUI
                                         viewModel: viewModel,
                                         savedCode: qrCode,
                                         sidebarSelection: $selection
-                                    ),
+                                    )
+                                    .environmentObject(themeManager),
                                     tag: "saved-\(qrCode.id.uuidString)",
                                     selection: $selection
                                 ) {
                                     VStack(alignment: .leading) {
                                         Text(qrCode.name)
                                             .lineLimit(1)
+                                            .foregroundColor(Color.appText)
 
                                         Text(qrCode.content.typeEnum.rawValue)
                                             .font(.caption)
-                                            .foregroundColor(.gray)
+                                            .foregroundColor(Color.appSubtitle)
                                     }
                                 }
                             }
@@ -77,9 +83,23 @@ import SwiftUI
                         }
                     }
                 }
+
+                // Add Settings section
+                Section {
+                    NavigationLink(
+                        destination: MacOSSettingsView(viewModel: viewModel)
+                            .environmentObject(themeManager),
+                        tag: "settings",
+                        selection: $selection
+                    ) {
+                        Label("Settings", systemImage: "gear")
+                            .foregroundColor(Color.appText)
+                    }
+                }
             }
             .listStyle(SidebarListStyle())
             .frame(minWidth: 180)
+            .background(Color.appCrust)
         }
     }
 
@@ -88,11 +108,13 @@ import SwiftUI
         let savedCode: SavedQRCode
         @State private var selectedExportFormat: QRCodeExportFormat = .png
         @Binding var sidebarSelection: String?
+        @EnvironmentObject var themeManager: ThemeManager
 
         var body: some View {
             VStack {
                 Text(savedCode.name)
                     .font(.title)
+                    .foregroundColor(Color.appText)
                     .padding(.bottom)
 
                 // QR Code preview
@@ -112,7 +134,9 @@ import SwiftUI
 
                 VStack(alignment: .leading) {
                     Text("Type: \(savedCode.content.typeEnum.rawValue)")
+                        .foregroundColor(Color.appText)
                     Text("Created: \(formattedDate(savedCode.dateCreated))")
+                        .foregroundColor(Color.appText)
                 }
                 .padding()
 
@@ -122,17 +146,20 @@ import SwiftUI
                         sidebarSelection = "create"
                     }
                     .padding()
+                    .foregroundColor(Color.appAccent)
 
                     Button("Export...") {
                         exportQRCode()
                     }
                     .padding()
+                    .foregroundColor(Color.appOrange)
                 }
 
                 Spacer()
             }
             .padding()
             .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .background(Color.appBackground)
         }
 
         private func formattedDate(_ date: Date) -> String {
