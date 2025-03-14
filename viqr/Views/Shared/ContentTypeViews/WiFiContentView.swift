@@ -18,31 +18,45 @@ struct WiFiContentView: View {
 
             if case .wifi(let ssid, let password, let isHidden, let security) = content.data {
                 Group {
-                    TextField("Network Name (SSID)", text: Binding(
-                        get: { ssid },
-                        set: { newValue in
-                            content.data = .wifi(ssid: newValue, password: password, isHidden: isHidden, security: security)
-                        }
-                    ))
+                    TextField(
+                        "Network Name (SSID)",
+                        text: Binding(
+                            get: { ssid },
+                            set: { newValue in
+                                content.data = .wifi(
+                                    ssid: newValue, password: password, isHidden: isHidden,
+                                    security: security)
+                            }
+                        )
+                    )
                     .textFieldStyle(RoundedBorderTextFieldStyle())
                     .disableAutocorrection(true)
                     // .autocapitalization(.none)
 
-                    Toggle("Hidden Network", isOn: Binding(
-                        get: { isHidden },
-                        set: { newValue in
-                            content.data = .wifi(ssid: ssid, password: password, isHidden: newValue, security: security)
-                        }
-                    ))
+                    Toggle(
+                        "Hidden Network",
+                        isOn: Binding(
+                            get: { isHidden },
+                            set: { newValue in
+                                content.data = .wifi(
+                                    ssid: ssid, password: password, isHidden: newValue,
+                                    security: security)
+                            }
+                        ))
 
                     HStack {
                         Text("Security")
-                        Picker("", selection: Binding(
-                            get: { security },
-                            set: { newValue in
-                                content.data = .wifi(ssid: ssid, password: password, isHidden: isHidden, security: newValue)
-                            }
-                        )) {
+                        Picker(
+                            "",
+                            selection: Binding(
+                                get: { security },
+                                set: { newValue in
+                                    content.data = .wifi(
+                                        ssid: ssid, password: password, isHidden: isHidden,
+                                        security: newValue)
+                                }
+                            )
+                        ) {
                             ForEach(WiFiSecurity.allCases, id: \.self) { securityType in
                                 Text(securityType.description).tag(securityType)
                             }
@@ -53,22 +67,32 @@ struct WiFiContentView: View {
                     if security != .nopass {
                         HStack {
                             if isPasswordVisible {
-                                TextField("Password", text: Binding<String>(
-                                    get: { password },
-                                    set: { newValue in
-                                        content.data = .wifi(ssid: ssid, password: newValue, isHidden: isHidden, security: security)
-                                    }
-                                ))
+                                TextField(
+                                    "Password",
+                                    text: Binding<String>(
+                                        get: { password },
+                                        set: { newValue in
+                                            content.data = .wifi(
+                                                ssid: ssid, password: newValue, isHidden: isHidden,
+                                                security: security)
+                                        }
+                                    )
+                                )
                                 .textFieldStyle(RoundedBorderTextFieldStyle())
                                 // .autocapitalization(.none)
                                 .disableAutocorrection(true)
                             } else {
-                                SecureField("Password", text: Binding<String>(
-                                    get: { password },
-                                    set: { newValue in
-                                        content.data = .wifi(ssid: ssid, password: newValue, isHidden: isHidden, security: security)
-                                    }
-                                ))
+                                SecureField(
+                                    "Password",
+                                    text: Binding<String>(
+                                        get: { password },
+                                        set: { newValue in
+                                            content.data = .wifi(
+                                                ssid: ssid, password: newValue, isHidden: isHidden,
+                                                security: security)
+                                        }
+                                    )
+                                )
                                 .textFieldStyle(RoundedBorderTextFieldStyle())
                             }
 
@@ -83,9 +107,11 @@ struct WiFiContentView: View {
                 }
             }
 
-            Text("When scanned, this QR code will allow devices to connect to this Wi-Fi network without typing the password.")
-                .font(.caption)
-                .foregroundColor(.gray)
+            Text(
+                "When scanned, this QR code will allow devices to connect to this Wi-Fi network without typing the password."
+            )
+            .font(.caption)
+            .foregroundColor(.gray)
         }
         .padding()
     }

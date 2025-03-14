@@ -13,19 +13,19 @@ struct viqrApp: App {
         WindowGroup {
             ContentView()
         }
-#if os(macOS)
-        .windowStyle(HiddenTitleBarWindowStyle())
-        .commands {
-            CommandGroup(replacing: .newItem) {
-                Button("New QR Code") {
-                    // This would reset to default state
-                    // but we'd need to access the view model from here
+        #if os(macOS)
+            .windowStyle(HiddenTitleBarWindowStyle())
+            .commands {
+                CommandGroup(replacing: .newItem) {
+                    Button("New QR Code") {
+                        // This would reset to default state
+                        // but we'd need to access the view model from here
+                    }
+                    .keyboardShortcut("n")
                 }
-                .keyboardShortcut("n")
-            }
 
-            SidebarCommands()
-        }
-#endif
+                SidebarCommands()
+            }
+        #endif
     }
 }

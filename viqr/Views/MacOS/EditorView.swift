@@ -5,8 +5,8 @@
 //  Created by Bùi Đặng Bình on 13/3/25.
 //
 
-import SwiftUI
 import QRCode
+import SwiftUI
 
 struct EditorView: View {
     @ObservedObject var viewModel: QRCodeViewModel
@@ -85,8 +85,12 @@ struct EditorView: View {
                             .font(.headline)
                             .padding(.bottom, 5)
 
-                        CustomColorPicker(colorComponents: $viewModel.qrStyle.backgroundColor, title: "Background")
-                        CustomColorPicker(colorComponents: $viewModel.qrStyle.foregroundColor, title: "Foreground")
+                        CustomColorPicker(
+                            colorComponents: $viewModel.qrStyle.backgroundColor, title: "Background"
+                        )
+                        CustomColorPicker(
+                            colorComponents: $viewModel.qrStyle.foregroundColor, title: "Foreground"
+                        )
                     }
 
                     Divider()
@@ -100,7 +104,10 @@ struct EditorView: View {
 
                         CustomColorPicker(
                             colorComponents: Binding(
-                                get: { viewModel.qrStyle.pupilColor ?? viewModel.qrStyle.foregroundColor },
+                                get: {
+                                    viewModel.qrStyle.pupilColor
+                                        ?? viewModel.qrStyle.foregroundColor
+                                },
                                 set: { viewModel.qrStyle.pupilColor = $0 }
                             ),
                             title: "Pupil Color"
@@ -108,7 +115,10 @@ struct EditorView: View {
 
                         CustomColorPicker(
                             colorComponents: Binding(
-                                get: { viewModel.qrStyle.borderColor ?? viewModel.qrStyle.foregroundColor },
+                                get: {
+                                    viewModel.qrStyle.borderColor
+                                        ?? viewModel.qrStyle.foregroundColor
+                                },
                                 set: { viewModel.qrStyle.borderColor = $0 }
                             ),
                             title: "Border Color"
@@ -158,7 +168,9 @@ struct EditorView: View {
             Image(systemName: iconName)
                 .font(.title2)
                 .frame(width: 44, height: 44)
-                .background(viewModel.qrStyle.eyeShape == style ? Color.blue.opacity(0.2) : Color.clear)
+                .background(
+                    viewModel.qrStyle.eyeShape == style ? Color.blue.opacity(0.2) : Color.clear
+                )
                 .cornerRadius(8)
         }
         .buttonStyle(PlainButtonStyle())
@@ -190,7 +202,9 @@ struct EditorView: View {
             Image(systemName: iconName)
                 .font(.title2)
                 .frame(width: 44, height: 44)
-                .background(viewModel.qrStyle.dataShape == style ? Color.blue.opacity(0.2) : Color.clear)
+                .background(
+                    viewModel.qrStyle.dataShape == style ? Color.blue.opacity(0.2) : Color.clear
+                )
                 .cornerRadius(8)
         }
         .buttonStyle(PlainButtonStyle())

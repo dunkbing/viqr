@@ -5,11 +5,11 @@
 //  Created by Bùi Đặng Bình on 13/3/25.
 //
 
-import SwiftUI
 import QRCode
+import SwiftUI
 
 #if canImport(UIKit)
-import UIKit
+    import UIKit
 #endif
 
 struct SavedTabView: View {
@@ -39,7 +39,10 @@ struct SavedTabView: View {
                 } else {
                     List {
                         ForEach(viewModel.savedCodes) { qrCode in
-                            NavigationLink(destination: SavedQRDetailView(viewModel: viewModel, savedCode: qrCode)) {
+                            NavigationLink(
+                                destination: SavedQRDetailView(
+                                    viewModel: viewModel, savedCode: qrCode)
+                            ) {
                                 HStack {
                                     // Generate a small preview
                                     let qrDocument = QRCodeGenerator.generateQRCode(
@@ -47,30 +50,32 @@ struct SavedTabView: View {
                                         with: qrCode.style
                                     )
                                     #if canImport(UIKit)
-                                    Group {
-                                        if let cgImage = try? qrDocument.cgImage(CGSize(width: 60, height: 60)) {
-                                            Image(uiImage: UIImage(cgImage: cgImage))
-                                                .interpolation(.none)
-                                                .resizable()
-                                                .frame(width: 60, height: 60)
-                                                .background(Color.white)
-                                                .cornerRadius(8)
-                                        } else {
-                                            // Fallback if QR code generation fails
-                                            Image(systemName: "qrcode")
-                                                .resizable()
-                                                .frame(width: 60, height: 60)
-                                                .background(Color.white)
-                                                .cornerRadius(8)
+                                        Group {
+                                            if let cgImage = try? qrDocument.cgImage(
+                                                CGSize(width: 60, height: 60))
+                                            {
+                                                Image(uiImage: UIImage(cgImage: cgImage))
+                                                    .interpolation(.none)
+                                                    .resizable()
+                                                    .frame(width: 60, height: 60)
+                                                    .background(Color.white)
+                                                    .cornerRadius(8)
+                                            } else {
+                                                // Fallback if QR code generation fails
+                                                Image(systemName: "qrcode")
+                                                    .resizable()
+                                                    .frame(width: 60, height: 60)
+                                                    .background(Color.white)
+                                                    .cornerRadius(8)
+                                            }
                                         }
-                                    }
                                     #else
-                                    // Fallback for non-UIKit platforms
-                                    Image(systemName: "qrcode")
-                                        .resizable()
-                                        .frame(width: 60, height: 60)
-                                        .background(Color.white)
-                                        .cornerRadius(8)
+                                        // Fallback for non-UIKit platforms
+                                        Image(systemName: "qrcode")
+                                            .resizable()
+                                            .frame(width: 60, height: 60)
+                                            .background(Color.white)
+                                            .cornerRadius(8)
                                     #endif
 
                                     VStack(alignment: .leading, spacing: 4) {
@@ -102,14 +107,16 @@ struct SavedTabView: View {
             .alert(isPresented: $showingDeleteAlert) {
                 Alert(
                     title: Text("Delete QR Code"),
-                    message: Text("Are you sure you want to delete this QR code? This action cannot be undone."),
+                    message: Text(
+                        "Are you sure you want to delete this QR code? This action cannot be undone."
+                    ),
                     primaryButton: .destructive(Text("Delete")) {
                         if let indexSet = itemToDelete {
                             viewModel.deleteSavedQRCode(at: indexSet)
                             itemToDelete = nil
                         }
                     },
-                    secondaryButton: .cancel() {
+                    secondaryButton: .cancel {
                         itemToDelete = nil
                     }
                 )

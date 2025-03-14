@@ -5,10 +5,10 @@
 //  Created by Bùi Đặng Bình on 13/3/25.
 //
 
-import Foundation
-import SwiftUI
-import QRCode
 import Combine
+import Foundation
+import QRCode
+import SwiftUI
 
 class QRCodeViewModel: ObservableObject {
     @Published var selectedType: QRCodeType = .link
@@ -78,7 +78,8 @@ class QRCodeViewModel: ObservableObject {
     // Export QR code as an image file
     func exportQRCode(as format: QRCodeExportFormat, named fileName: String) -> URL? {
         let qrCode = generateQRCode()
-        return QRCodeGenerator.saveQRCodeToFile(qrCode: qrCode, fileName: fileName, fileFormat: format)
+        return QRCodeGenerator.saveQRCodeToFile(
+            qrCode: qrCode, fileName: fileName, fileFormat: format)
     }
 
     // Update content type when selected type changes
@@ -101,7 +102,9 @@ class QRCodeViewModel: ObservableObject {
         case .wifi:
             currentData = .wifi(ssid: "", password: "", isHidden: false, security: .WPA)
         case .vCard:
-            currentData = .vCard(firstName: "", lastName: "", organization: "", title: "", phone: "", email: "", address: "", website: "", note: "")
+            currentData = .vCard(
+                firstName: "", lastName: "", organization: "", title: "", phone: "", email: "",
+                address: "", website: "", note: "")
         }
 
         qrContent = QRCodeContent(type: newType, data: currentData)
@@ -117,7 +120,8 @@ class QRCodeViewModel: ObservableObject {
     // Load from UserDefaults
     private func loadSavedCodes() {
         if let savedData = UserDefaults.standard.data(forKey: savedCodesKey),
-           let decodedCodes = try? JSONDecoder().decode([SavedQRCode].self, from: savedData) {
+            let decodedCodes = try? JSONDecoder().decode([SavedQRCode].self, from: savedData)
+        {
             savedCodes = decodedCodes
         }
     }

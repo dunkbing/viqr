@@ -17,22 +17,26 @@ struct TextContentView: View {
 
             if case .text(let textContent) = content.data {
                 #if os(iOS)
-                TextEditor(text: Binding(
-                    get: { textContent },
-                    set: { content.data = .text(content: $0) }
-                ))
-                .frame(minHeight: 150)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 8)
-                        .stroke(Color.gray.opacity(0.2), lineWidth: 1)
-                )
+                    TextEditor(
+                        text: Binding(
+                            get: { textContent },
+                            set: { content.data = .text(content: $0) }
+                        )
+                    )
+                    .frame(minHeight: 150)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 8)
+                            .stroke(Color.gray.opacity(0.2), lineWidth: 1)
+                    )
                 #else
-                TextEditor(text: Binding(
-                    get: { textContent },
-                    set: { content.data = .text(content: $0) }
-                ))
-                .frame(minHeight: 150)
-                .border(Color.gray.opacity(0.2), width: 1)
+                    TextEditor(
+                        text: Binding(
+                            get: { textContent },
+                            set: { content.data = .text(content: $0) }
+                        )
+                    )
+                    .frame(minHeight: 150)
+                    .border(Color.gray.opacity(0.2), width: 1)
                 #endif
             }
 

@@ -5,8 +5,8 @@
 //  Created by Bùi Đặng Bình on 13/3/25.
 //
 
-import SwiftUI
 import QRCode
+import SwiftUI
 
 struct SettingsTabView: View {
     @ObservedObject var viewModel: QRCodeViewModel
@@ -40,10 +40,13 @@ struct SettingsTabView: View {
                     }
 
                     if !viewModel.savedCodes.isEmpty {
-                        Button(role: .destructive, action: {
-                            // Add confirmation dialog
-                            let _ = viewModel.savedCodes.removeAll()
-                        }) {
+                        Button(
+                            role: .destructive,
+                            action: {
+                                // Add confirmation dialog
+                                let _ = viewModel.savedCodes.removeAll()
+                            }
+                        ) {
                             Text("Clear All Saved QR Codes")
                         }
                     }
@@ -68,7 +71,9 @@ struct SettingsTabView: View {
                             .foregroundColor(.gray)
                     }
 
-                    Link("QR Code Library", destination: URL(string: "https://github.com/dagronf/QRCode")!)
+                    Link(
+                        "QR Code Library",
+                        destination: URL(string: "https://github.com/dagronf/QRCode")!)
                 }
             }
             .navigationTitle("Settings")
@@ -103,16 +108,25 @@ struct AboutView: View {
                         .padding(.vertical)
 
                     VStack(alignment: .leading, spacing: 15) {
-                        Text("QR Studio is a powerful QR code generator that lets you create, customize, and save QR codes for various purposes.")
-                            .padding(.bottom)
+                        Text(
+                            "QR Studio is a powerful QR code generator that lets you create, customize, and save QR codes for various purposes."
+                        )
+                        .padding(.bottom)
 
                         Text("Features:")
                             .font(.headline)
 
-                        FeatureRow(icon: "link", text: "Generate QR codes for links, text, contact details, and more")
-                        FeatureRow(icon: "paintbrush", text: "Customize colors and styles of your QR codes")
-                        FeatureRow(icon: "square.and.arrow.down", text: "Export QR codes in multiple formats")
-                        FeatureRow(icon: "folder", text: "Save and organize your frequently used QR codes")
+                        FeatureRow(
+                            icon: "link",
+                            text: "Generate QR codes for links, text, contact details, and more")
+                        FeatureRow(
+                            icon: "paintbrush", text: "Customize colors and styles of your QR codes"
+                        )
+                        FeatureRow(
+                            icon: "square.and.arrow.down",
+                            text: "Export QR codes in multiple formats")
+                        FeatureRow(
+                            icon: "folder", text: "Save and organize your frequently used QR codes")
                     }
                     .padding()
 
@@ -124,10 +138,10 @@ struct AboutView: View {
                 }
                 .padding()
             }
-//            .navigationBarTitle("About", displayMode: .inline)
-//            .navigationBarItems(trailing: Button("Done") {
-//                presentationMode.wrappedValue.dismiss()
-//            })
+            //            .navigationBarTitle("About", displayMode: .inline)
+            //            .navigationBarItems(trailing: Button("Done") {
+            //                presentationMode.wrappedValue.dismiss()
+            //            })
         }
     }
 }

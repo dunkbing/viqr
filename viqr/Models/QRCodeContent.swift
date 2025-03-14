@@ -9,7 +9,7 @@ import Foundation
 
 struct QRCodeContent: Codable, Identifiable {
     var id = UUID()
-    var type: String // Using String instead of QRCodeType for Codable
+    var type: String  // Using String instead of QRCodeType for Codable
     var title: String = ""
     var data: ContentData
 
@@ -30,7 +30,9 @@ enum ContentData: Codable, Equatable {
     case phone(number: String)
     case whatsapp(number: String, message: String)
     case wifi(ssid: String, password: String, isHidden: Bool, security: WiFiSecurity)
-    case vCard(firstName: String, lastName: String, organization: String, title: String, phone: String, email: String, address: String, website: String, note: String)
+    case vCard(
+        firstName: String, lastName: String, organization: String, title: String, phone: String,
+        email: String, address: String, website: String, note: String)
 
     // Helper method to get the formatted content string for QR code generation
     func formattedString() -> String {
@@ -44,18 +46,21 @@ enum ContentData: Codable, Equatable {
             if !subject.isEmpty || !body.isEmpty {
                 emailString += "?"
                 if !subject.isEmpty {
-                    emailString += "subject=\(subject.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "")"
+                    emailString +=
+                        "subject=\(subject.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "")"
                 }
                 if !body.isEmpty {
                     emailString += subject.isEmpty ? "" : "&"
-                    emailString += "body=\(body.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "")"
+                    emailString +=
+                        "body=\(body.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "")"
                 }
             }
             return emailString
         case .phone(let number):
             return "tel:\(number)"
         case .whatsapp(let number, let message):
-            return "https://wa.me/\(number.replacingOccurrences(of: "+", with: "").replacingOccurrences(of: " ", with: ""))?text=\(message.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "")"
+            return
+                "https://wa.me/\(number.replacingOccurrences(of: "+", with: "").replacingOccurrences(of: " ", with: ""))?text=\(message.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "")"
         case .wifi(let ssid, let password, let isHidden, let security):
             let securityStr = security == .nopass ? "nopass" : security.rawValue
             var wifiString = "WIFI:S:\(ssid);"
@@ -68,7 +73,9 @@ enum ContentData: Codable, Equatable {
             }
             wifiString += ";"
             return wifiString
-        case .vCard(let firstName, let lastName, let organization, let title, let phone, let email, let address, let website, let note):
+        case .vCard(
+            let firstName, let lastName, let organization, let title, let phone, let email,
+            let address, let website, let note):
             var vCardString = "BEGIN:VCARD\nVERSION:3.0\n"
             vCardString += "N:\(lastName);\(firstName);;;\n"
             vCardString += "FN:\(firstName) \(lastName)\n"
@@ -100,7 +107,8 @@ enum ContentData: Codable, Equatable {
 
     // Private enum for coding/decoding
     private enum CodingKeys: String, CodingKey {
-        case type, url, content, address, subject, body, number, message, ssid, password, isHidden, security
+        case type, url, content, address, subject, body, number, message, ssid, password, isHidden,
+            security
         case firstName, lastName, organization, title, phone, email, address_vcard, website, note
     }
 
@@ -133,7 +141,9 @@ enum ContentData: Codable, Equatable {
             try container.encode(password, forKey: .password)
             try container.encode(isHidden, forKey: .isHidden)
             try container.encode(security.rawValue, forKey: .security)
-        case .vCard(let firstName, let lastName, let organization, let title, let phone, let email, let address, let website, let note):
+        case .vCard(
+            let firstName, let lastName, let organization, let title, let phone, let email,
+            let address, let website, let note):
             try container.encode("vCard", forKey: .type)
             try container.encode(firstName, forKey: .firstName)
             try container.encode(lastName, forKey: .lastName)
@@ -188,9 +198,12 @@ enum ContentData: Codable, Equatable {
             let address = try container.decode(String.self, forKey: .address_vcard)
             let website = try container.decode(String.self, forKey: .website)
             let note = try container.decode(String.self, forKey: .note)
-            self = .vCard(firstName: firstName, lastName: lastName, organization: organization, title: title, phone: phone, email: email, address: address, website: website, note: note)
+            self = .vCard(
+                firstName: firstName, lastName: lastName, organization: organization, title: title,
+                phone: phone, email: email, address: address, website: website, note: note)
         default:
-            throw DecodingError.dataCorruptedError(forKey: .type, in: container, debugDescription: "Unknown content type")
+            throw DecodingError.dataCorruptedError(
+                forKey: .type, in: container, debugDescription: "Unknown content type")
         }
     }
 }

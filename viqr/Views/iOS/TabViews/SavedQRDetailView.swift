@@ -5,8 +5,8 @@
 //  Created by Bùi Đặng Bình on 14/3/25.
 //
 
-import SwiftUI
 import QRCode
+import SwiftUI
 
 struct SavedQRDetailView: View {
     @ObservedObject var viewModel: QRCodeViewModel
@@ -27,41 +27,42 @@ struct SavedQRDetailView: View {
                     .padding(.top)
 
                 // QR Code image
-                let qrDocument = QRCodeGenerator.generateQRCode(from: savedCode.content, with: savedCode.style)
+                let qrDocument = QRCodeGenerator.generateQRCode(
+                    from: savedCode.content, with: savedCode.style)
                 #if canImport(UIKit)
-                Group {
-                    if let cgImage = try? qrDocument.cgImage(CGSize(width: 250, height: 250)) {
-                        Image(uiImage: UIImage(cgImage: cgImage))
-                            .interpolation(.none)
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 250, height: 250)
-                            .background(Color.white)
-                            .cornerRadius(16)
-                            .shadow(radius: 2)
-                            .padding()
-                    } else {
-                        // Fallback if QR code generation fails
-                        Image(systemName: "qrcode")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 250, height: 250)
-                            .background(Color.white)
-                            .cornerRadius(16)
-                            .shadow(radius: 2)
-                            .padding()
+                    Group {
+                        if let cgImage = try? qrDocument.cgImage(CGSize(width: 250, height: 250)) {
+                            Image(uiImage: UIImage(cgImage: cgImage))
+                                .interpolation(.none)
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 250, height: 250)
+                                .background(Color.white)
+                                .cornerRadius(16)
+                                .shadow(radius: 2)
+                                .padding()
+                        } else {
+                            // Fallback if QR code generation fails
+                            Image(systemName: "qrcode")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 250, height: 250)
+                                .background(Color.white)
+                                .cornerRadius(16)
+                                .shadow(radius: 2)
+                                .padding()
+                        }
                     }
-                }
                 #else
-                // Fallback for non-UIKit platforms
-                Image(systemName: "qrcode")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 250, height: 250)
-                    .background(Color.white)
-                    .cornerRadius(16)
-                    .shadow(radius: 2)
-                    .padding()
+                    // Fallback for non-UIKit platforms
+                    Image(systemName: "qrcode")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 250, height: 250)
+                        .background(Color.white)
+                        .cornerRadius(16)
+                        .shadow(radius: 2)
+                        .padding()
                 #endif
 
                 // QR Code Details
@@ -75,7 +76,9 @@ struct SavedQRDetailView: View {
                         case .link(let url):
                             DetailRow(label: "URL", value: url)
                         case .text(let content):
-                            DetailRow(label: "Text", value: content.prefix(50) + (content.count > 50 ? "..." : ""))
+                            DetailRow(
+                                label: "Text",
+                                value: content.prefix(50) + (content.count > 50 ? "..." : ""))
                         case .phone(let number):
                             DetailRow(label: "Phone", value: number)
                         case .email(let address, let subject, _):
@@ -114,18 +117,19 @@ struct SavedQRDetailView: View {
                     }
 
                     #if os(iOS)
-                    Button(action: {
-                        #if canImport(UIKit)
-                        UIPasteboard.general.string = savedCode.content.data.formattedString()
-                        #endif
-                    }) {
-                        Label("Copy to Clipboard", systemImage: "doc.on.doc")
-                            .frame(maxWidth: .infinity)
-                            .padding()
-                            .background(Color.green)
-                            .foregroundColor(.white)
-                            .cornerRadius(10)
-                    }
+                        Button(action: {
+                            #if canImport(UIKit)
+                                UIPasteboard.general.string = savedCode.content.data
+                                    .formattedString()
+                            #endif
+                        }) {
+                            Label("Copy to Clipboard", systemImage: "doc.on.doc")
+                                .frame(maxWidth: .infinity)
+                                .padding()
+                                .background(Color.green)
+                                .foregroundColor(.white)
+                                .cornerRadius(10)
+                        }
                     #endif
 
                     Button(action: {
@@ -144,15 +148,16 @@ struct SavedQRDetailView: View {
             }
         }
         #if os(iOS)
-        .sheet(isPresented: $showingExportSheet) {
-            VStack(spacing: 20) {
-                Text("Export QR Code Image")
+            .sheet(isPresented: $showingExportSheet) {
+                VStack(spacing: 20) {
+                    Text("Export QR Code Image")
                     .font(.headline)
 
-                // Preview of the QR code
-                let qrDocument = QRCodeGenerator.generateQRCode(from: savedCode.content, with: savedCode.style)
-                if let uiImage = try? qrDocument.uiImage(CGSize(width: 150, height: 150)) {
-                    Image(uiImage: uiImage)
+                    // Preview of the QR code
+                    let qrDocument = QRCodeGenerator.generateQRCode(
+                        from: savedCode.content, with: savedCode.style)
+                    if let uiImage = try? qrDocument.uiImage(CGSize(width: 150, height: 150)) {
+                        Image(uiImage: uiImage)
                         .resizable()
                         .interpolation(.none)
                         .scaledToFit()
@@ -160,58 +165,58 @@ struct SavedQRDetailView: View {
                         .background(Color.white)
                         .cornerRadius(10)
                         .shadow(radius: 2)
-                }
+                    }
 
-                // Filename field
-                TextField("Filename", text: $exportFileName)
+                    // Filename field
+                    TextField("Filename", text: $exportFileName)
                     .textFieldStyle(RoundedBorderTextFieldStyle())
                     .padding(.horizontal)
 
-                // Format picker
-                Picker("Format", selection: $selectedExportFormat) {
-                    Text("PNG").tag(QRCodeExportFormat.png)
-                    Text("SVG").tag(QRCodeExportFormat.svg)
-                    Text("PDF").tag(QRCodeExportFormat.pdf)
-                }
-                .pickerStyle(SegmentedPickerStyle())
-                .padding(.horizontal)
-
-                HStack {
-                    Button("Cancel") {
-                        showingExportSheet = false
+                    // Format picker
+                    Picker("Format", selection: $selectedExportFormat) {
+                        Text("PNG").tag(QRCodeExportFormat.png)
+                        Text("SVG").tag(QRCodeExportFormat.svg)
+                        Text("PDF").tag(QRCodeExportFormat.pdf)
                     }
-                    .foregroundColor(.red)
+                    .pickerStyle(SegmentedPickerStyle())
+                    .padding(.horizontal)
 
-                    Spacer()
-
-                    Button("Export") {
-                        exportedFileURL = QRCodeGenerator.saveQRCodeToFile(
-                            qrCode: qrDocument,
-                            fileName: exportFileName,
-                            fileFormat: selectedExportFormat
-                        )
-
-                        if exportedFileURL != nil {
+                    HStack {
+                        Button("Cancel") {
                             showingExportSheet = false
-                            showingShareSheet = true
                         }
+                        .foregroundColor(.red)
+
+                        Spacer()
+
+                        Button("Export") {
+                            exportedFileURL = QRCodeGenerator.saveQRCodeToFile(
+                                qrCode: qrDocument,
+                                fileName: exportFileName,
+                                fileFormat: selectedExportFormat
+                            )
+
+                            if exportedFileURL != nil {
+                                showingExportSheet = false
+                                showingShareSheet = true
+                            }
+                        }
+                        .disabled(exportFileName.isEmpty)
                     }
-                    .disabled(exportFileName.isEmpty)
+                    .padding()
                 }
                 .padding()
             }
-            .padding()
-        }
-        .sheet(isPresented: $showingShareSheet) {
-            if let url = exportedFileURL {
-                ShareSheet(items: [url])
+            .sheet(isPresented: $showingShareSheet) {
+                if let url = exportedFileURL {
+                    ShareSheet(items: [url])
+                }
             }
-        }
         #else
-        .sheet(isPresented: $showingExportSheet) {
-            MacExportPanel_SavedCode(savedCode: savedCode, isPresented: $showingExportSheet)
+            .sheet(isPresented: $showingExportSheet) {
+                MacExportPanel_SavedCode(savedCode: savedCode, isPresented: $showingExportSheet)
                 .frame(width: 400, height: 300)
-        }
+            }
         #endif
     }
 
@@ -224,90 +229,92 @@ struct SavedQRDetailView: View {
 }
 
 #if os(macOS)
-struct MacExportPanel_SavedCode: View {
-    let savedCode: SavedQRCode
-    @Binding var isPresented: Bool
-    @State private var selectedFormat: QRCodeExportFormat = .png
-    @State private var fileName: String = "QRCode"
+    struct MacExportPanel_SavedCode: View {
+        let savedCode: SavedQRCode
+        @Binding var isPresented: Bool
+        @State private var selectedFormat: QRCodeExportFormat = .png
+        @State private var fileName: String = "QRCode"
 
-    var body: some View {
-        VStack(spacing: 20) {
-            Text("Export QR Code Image")
-                .font(.headline)
+        var body: some View {
+            VStack(spacing: 20) {
+                Text("Export QR Code Image")
+                    .font(.headline)
 
-            // Preview of the QR code
-            let qrDocument = QRCodeGenerator.generateQRCode(from: savedCode.content, with: savedCode.style)
-            if let nsImage = try? qrDocument.nsImage(CGSize(width: 150, height: 150)) {
-                Image(nsImage: nsImage)
-                    .resizable()
-                    .interpolation(.none)
-                    .scaledToFit()
-                    .frame(width: 150, height: 150)
-                    .background(Color.white)
-                    .cornerRadius(10)
-                    .shadow(radius: 2)
-            }
+                // Preview of the QR code
+                let qrDocument = QRCodeGenerator.generateQRCode(
+                    from: savedCode.content, with: savedCode.style)
+                if let nsImage = try? qrDocument.nsImage(CGSize(width: 150, height: 150)) {
+                    Image(nsImage: nsImage)
+                        .resizable()
+                        .interpolation(.none)
+                        .scaledToFit()
+                        .frame(width: 150, height: 150)
+                        .background(Color.white)
+                        .cornerRadius(10)
+                        .shadow(radius: 2)
+                }
 
-            // Filename field
-            TextField("Filename", text: $fileName)
-                .textFieldStyle(RoundedBorderTextFieldStyle())
+                // Filename field
+                TextField("Filename", text: $fileName)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                    .frame(width: 300)
+
+                // Format picker
+                Picker("Format", selection: $selectedFormat) {
+                    Text("PNG").tag(QRCodeExportFormat.png)
+                    Text("SVG").tag(QRCodeExportFormat.svg)
+                    Text("PDF").tag(QRCodeExportFormat.pdf)
+                }
+                .pickerStyle(SegmentedPickerStyle())
                 .frame(width: 300)
 
-            // Format picker
-            Picker("Format", selection: $selectedFormat) {
-                Text("PNG").tag(QRCodeExportFormat.png)
-                Text("SVG").tag(QRCodeExportFormat.svg)
-                Text("PDF").tag(QRCodeExportFormat.pdf)
-            }
-            .pickerStyle(SegmentedPickerStyle())
-            .frame(width: 300)
+                HStack(spacing: 20) {
+                    Button("Cancel") {
+                        isPresented = false
+                    }
+                    .keyboardShortcut(.cancelAction)
 
-            HStack(spacing: 20) {
-                Button("Cancel") {
-                    isPresented = false
+                    Button("Export") {
+                        exportQRCode()
+                        isPresented = false
+                    }
+                    .keyboardShortcut(.defaultAction)
+                    .disabled(fileName.isEmpty)
                 }
-                .keyboardShortcut(.cancelAction)
-
-                Button("Export") {
-                    exportQRCode()
-                    isPresented = false
-                }
-                .keyboardShortcut(.defaultAction)
-                .disabled(fileName.isEmpty)
+                .padding(.top)
             }
-            .padding(.top)
+            .padding()
         }
-        .padding()
-    }
 
-    private func exportQRCode() {
-        let savePanel = NSSavePanel()
-        savePanel.allowedFileTypes = [selectedFormat.fileExtension]
-        savePanel.nameFieldStringValue = fileName
+        private func exportQRCode() {
+            let savePanel = NSSavePanel()
+            savePanel.allowedFileTypes = [selectedFormat.fileExtension]
+            savePanel.nameFieldStringValue = fileName
 
-        if savePanel.runModal() == .OK, let url = savePanel.url {
-            let qrDocument = QRCodeGenerator.generateQRCode(from: savedCode.content, with: savedCode.style)
-            let fileExtension = url.pathExtension.lowercased()
+            if savePanel.runModal() == .OK, let url = savePanel.url {
+                let qrDocument = QRCodeGenerator.generateQRCode(
+                    from: savedCode.content, with: savedCode.style)
+                let fileExtension = url.pathExtension.lowercased()
 
-            do {
-                var data: Data?
+                do {
+                    var data: Data?
 
-                switch fileExtension {
-                case "svg":
-                    data = try qrDocument.svgData(dimension: 1024)
-                case "pdf":
-                    data = try qrDocument.pdfData(dimension: 1024)
-                default:
-                    data = try qrDocument.pngData(dimension: 1024)
+                    switch fileExtension {
+                    case "svg":
+                        data = try qrDocument.svgData(dimension: 1024)
+                    case "pdf":
+                        data = try qrDocument.pdfData(dimension: 1024)
+                    default:
+                        data = try qrDocument.pngData(dimension: 1024)
+                    }
+
+                    if let data = data {
+                        try data.write(to: url)
+                    }
+                } catch {
+                    print("Error exporting QR code: \(error)")
                 }
-
-                if let data = data {
-                    try data.write(to: url)
-                }
-            } catch {
-                print("Error exporting QR code: \(error)")
             }
         }
     }
-}
 #endif

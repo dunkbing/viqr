@@ -16,14 +16,17 @@ struct LinkContentView: View {
                 .font(.headline)
 
             if case .link(let url) = content.data {
-                TextField("https://example.com", text: Binding(
-                    get: { url },
-                    set: { content.data = .link(url: $0) }
-                ))
+                TextField(
+                    "https://example.com",
+                    text: Binding(
+                        get: { url },
+                        set: { content.data = .link(url: $0) }
+                    )
+                )
                 .textFieldStyle(RoundedBorderTextFieldStyle())
-//                .autocapitalization(.none)
+                //                .autocapitalization(.none)
                 .disableAutocorrection(true)
-//                .keyboardType(.URL)
+                //                .keyboardType(.URL)
             }
 
             Text("Tip: Include 'https://' for proper linking.")

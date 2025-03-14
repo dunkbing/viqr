@@ -5,10 +5,11 @@
 //  Created by Bùi Đặng Bình on 13/3/25.
 //
 
-import SwiftUI
 import QRCode
+import SwiftUI
+
 #if canImport(UIKit)
-import UIKit
+    import UIKit
 #endif
 
 struct TypeButton: View {
@@ -137,18 +138,20 @@ struct CreateTabView: View {
                 NavigationView {
                     iOSEditorView(viewModel: viewModel)
                         .navigationTitle("Edit Content")
-                        .navigationBarItems(trailing: Button("Done") {
-                            showingContentSheet = false
-                        })
+                        .navigationBarItems(
+                            trailing: Button("Done") {
+                                showingContentSheet = false
+                            })
                 }
             }
             .sheet(isPresented: $showingStyleSheet) {
                 NavigationView {
                     iOSStyleEditorView(viewModel: viewModel)
                         .navigationTitle("Edit Style")
-                        .navigationBarItems(trailing: Button("Done") {
-                            showingStyleSheet = false
-                        })
+                        .navigationBarItems(
+                            trailing: Button("Done") {
+                                showingStyleSheet = false
+                            })
                 }
             }
             .sheet(isPresented: $showingSaveSheet) {
@@ -188,16 +191,16 @@ struct CreateTabView: View {
                     let qrDocument = viewModel.generateQRCode()
 
                     #if canImport(UIKit)
-                    if let uiImage = try? qrDocument.uiImage(CGSize(width: 150, height: 150)) {
-                        Image(uiImage: uiImage)
-                            .resizable()
-                            .interpolation(.none)
-                            .scaledToFit()
-                            .frame(width: 150, height: 150)
-                            .background(Color.white)
-                            .cornerRadius(10)
-                            .shadow(radius: 2)
-                    }
+                        if let uiImage = try? qrDocument.uiImage(CGSize(width: 150, height: 150)) {
+                            Image(uiImage: uiImage)
+                                .resizable()
+                                .interpolation(.none)
+                                .scaledToFit()
+                                .frame(width: 150, height: 150)
+                                .background(Color.white)
+                                .cornerRadius(10)
+                                .shadow(radius: 2)
+                        }
                     #endif
 
                     // Filename field
@@ -223,7 +226,8 @@ struct CreateTabView: View {
                         Spacer()
 
                         Button("Export") {
-                            exportedFileURL = viewModel.exportQRCode(as: selectedExportFormat, named: exportFileName)
+                            exportedFileURL = viewModel.exportQRCode(
+                                as: selectedExportFormat, named: exportFileName)
                             if exportedFileURL != nil {
                                 showingExportSheet = false
                                 showingShareSheet = true

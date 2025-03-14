@@ -46,14 +46,14 @@ struct ColorComponents: Codable, Equatable {
     var a: Double
 
     var color: Color {
-        Color(red: r/255, green: g/255, blue: b/255, opacity: a)
+        Color(red: r / 255, green: g / 255, blue: b / 255, opacity: a)
     }
 
     var cgColor: CGColor {
         #if canImport(UIKit)
-        return UIColor(red: r/255, green: g/255, blue: b/255, alpha: a).cgColor
+            return UIColor(red: r / 255, green: g / 255, blue: b / 255, alpha: a).cgColor
         #else
-        return NSColor(red: r/255, green: g/255, blue: b/255, alpha: a).cgColor
+            return NSColor(red: r / 255, green: g / 255, blue: b / 255, alpha: a).cgColor
         #endif
     }
 
@@ -71,27 +71,27 @@ struct ColorComponents: Codable, Equatable {
         var alpha: CGFloat = 0
 
         #if canImport(UIKit)
-        let uiColor = UIColor(color)
-        let cgColor = uiColor.cgColor
-        let components = cgColor.components ?? [0, 0, 0, 0]
-        if components.count == 4 {
-            red = components[0]
-            green = components[1]
-            blue = components[2]
-            alpha = components[3]
-        } else if components.count == 2 {
-            // Grayscale
-            red = components[0]
-            green = components[0]
-            blue = components[0]
-            alpha = components[1]
-        }
+            let uiColor = UIColor(color)
+            let cgColor = uiColor.cgColor
+            let components = cgColor.components ?? [0, 0, 0, 0]
+            if components.count == 4 {
+                red = components[0]
+                green = components[1]
+                blue = components[2]
+                alpha = components[3]
+            } else if components.count == 2 {
+                // Grayscale
+                red = components[0]
+                green = components[0]
+                blue = components[0]
+                alpha = components[1]
+            }
         #else
-        let color = NSColor(color)
-        red = color.redComponent
-        green = color.greenComponent
-        blue = color.blueComponent
-        alpha = color.alphaComponent
+            let color = NSColor(color)
+            red = color.redComponent
+            green = color.greenComponent
+            blue = color.blueComponent
+            alpha = color.alphaComponent
         #endif
 
         self.r = Double(red * 255)

@@ -17,49 +17,63 @@ struct EmailContentView: View {
 
             if case .email(let address, let subject, let body) = content.data {
                 Group {
-                    TextField("Email Address", text: Binding(
-                        get: { address },
-                        set: { newValue in
-                            content.data = .email(address: newValue, subject: subject, body: body)
-                        }
-                    ))
+                    TextField(
+                        "Email Address",
+                        text: Binding(
+                            get: { address },
+                            set: { newValue in
+                                content.data = .email(
+                                    address: newValue, subject: subject, body: body)
+                            }
+                        )
+                    )
                     .textFieldStyle(RoundedBorderTextFieldStyle())
-//                    .keyboardType(.emailAddress)
-//                    .autocapitalization(.none)
+                    //                    .keyboardType(.emailAddress)
+                    //                    .autocapitalization(.none)
                     .disableAutocorrection(true)
 
-                    TextField("Subject (optional)", text: Binding(
-                        get: { subject },
-                        set: { newValue in
-                            content.data = .email(address: address, subject: newValue, body: body)
-                        }
-                    ))
+                    TextField(
+                        "Subject (optional)",
+                        text: Binding(
+                            get: { subject },
+                            set: { newValue in
+                                content.data = .email(
+                                    address: address, subject: newValue, body: body)
+                            }
+                        )
+                    )
                     .textFieldStyle(RoundedBorderTextFieldStyle())
 
                     Text("Email Body (optional)")
                         .font(.subheadline)
 
                     #if os(iOS)
-                    TextEditor(text: Binding(
-                        get: { body },
-                        set: { newValue in
-                            content.data = .email(address: address, subject: subject, body: newValue)
-                        }
-                    ))
-                    .frame(minHeight: 100)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 8)
-                            .stroke(Color.gray.opacity(0.2), lineWidth: 1)
-                    )
+                        TextEditor(
+                            text: Binding(
+                                get: { body },
+                                set: { newValue in
+                                    content.data = .email(
+                                        address: address, subject: subject, body: newValue)
+                                }
+                            )
+                        )
+                        .frame(minHeight: 100)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 8)
+                                .stroke(Color.gray.opacity(0.2), lineWidth: 1)
+                        )
                     #else
-                    TextEditor(text: Binding(
-                        get: { body },
-                        set: { newValue in
-                            content.data = .email(address: address, subject: subject, body: newValue)
-                        }
-                    ))
-                    .frame(minHeight: 100)
-                    .border(Color.gray.opacity(0.2), width: 1)
+                        TextEditor(
+                            text: Binding(
+                                get: { body },
+                                set: { newValue in
+                                    content.data = .email(
+                                        address: address, subject: subject, body: newValue)
+                                }
+                            )
+                        )
+                        .frame(minHeight: 100)
+                        .border(Color.gray.opacity(0.2), width: 1)
                     #endif
                 }
             }

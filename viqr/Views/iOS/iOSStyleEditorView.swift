@@ -15,8 +15,12 @@ struct iOSStyleEditorView: View {
             VStack(alignment: .leading, spacing: 20) {
                 Group {
                     Section(header: Text("Colors").font(.headline)) {
-                        CustomColorPicker(colorComponents: $viewModel.qrStyle.backgroundColor, title: "Background")
-                        CustomColorPicker(colorComponents: $viewModel.qrStyle.foregroundColor, title: "Foreground")
+                        CustomColorPicker(
+                            colorComponents: $viewModel.qrStyle.backgroundColor, title: "Background"
+                        )
+                        CustomColorPicker(
+                            colorComponents: $viewModel.qrStyle.foregroundColor, title: "Foreground"
+                        )
                     }
 
                     Divider()
@@ -26,7 +30,10 @@ struct iOSStyleEditorView: View {
 
                         CustomColorPicker(
                             colorComponents: Binding(
-                                get: { viewModel.qrStyle.pupilColor ?? viewModel.qrStyle.foregroundColor },
+                                get: {
+                                    viewModel.qrStyle.pupilColor
+                                        ?? viewModel.qrStyle.foregroundColor
+                                },
                                 set: { viewModel.qrStyle.pupilColor = $0 }
                             ),
                             title: "Pupil Color"
@@ -34,7 +41,10 @@ struct iOSStyleEditorView: View {
 
                         CustomColorPicker(
                             colorComponents: Binding(
-                                get: { viewModel.qrStyle.borderColor ?? viewModel.qrStyle.foregroundColor },
+                                get: {
+                                    viewModel.qrStyle.borderColor
+                                        ?? viewModel.qrStyle.foregroundColor
+                                },
                                 set: { viewModel.qrStyle.borderColor = $0 }
                             ),
                             title: "Border Color"
@@ -80,7 +90,9 @@ struct iOSStyleEditorView: View {
                 .font(.title2)
                 .foregroundColor(viewModel.qrStyle.eyeShape == style ? .white : .primary)
                 .frame(width: 60, height: 60)
-                .background(viewModel.qrStyle.eyeShape == style ? Color.blue : Color.gray.opacity(0.2))
+                .background(
+                    viewModel.qrStyle.eyeShape == style ? Color.blue : Color.gray.opacity(0.2)
+                )
                 .cornerRadius(10)
         }
     }
@@ -112,7 +124,9 @@ struct iOSStyleEditorView: View {
                 .font(.title2)
                 .foregroundColor(viewModel.qrStyle.dataShape == style ? .white : .primary)
                 .frame(width: 60, height: 60)
-                .background(viewModel.qrStyle.dataShape == style ? Color.blue : Color.gray.opacity(0.2))
+                .background(
+                    viewModel.qrStyle.dataShape == style ? Color.blue : Color.gray.opacity(0.2)
+                )
                 .cornerRadius(10)
         }
     }

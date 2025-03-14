@@ -6,21 +6,23 @@
 //
 
 import SwiftUI
+
 #if os(iOS)
-import UIKit
+    import UIKit
 
-// iOS Share Sheet compatible with iOS 15
-struct ShareSheet: UIViewControllerRepresentable {
-    var items: [Any]
+    // iOS Share Sheet compatible with iOS 15
+    struct ShareSheet: UIViewControllerRepresentable {
+        var items: [Any]
 
-    func makeUIViewController(context: Context) -> UIActivityViewController {
-        let controller = UIActivityViewController(
-            activityItems: items,
-            applicationActivities: nil
-        )
-        return controller
+        func makeUIViewController(context: Context) -> UIActivityViewController {
+            let controller = UIActivityViewController(
+                activityItems: items,
+                applicationActivities: nil
+            )
+            return controller
+        }
+
+        func updateUIViewController(_ uiViewController: UIActivityViewController, context: Context)
+        {}
     }
-
-    func updateUIViewController(_ uiViewController: UIActivityViewController, context: Context) {}
-}
 #endif
