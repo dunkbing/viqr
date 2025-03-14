@@ -20,6 +20,8 @@ class QRCodeViewModel: ObservableObject {
     private let savedCodesKey = "SavedQRCodes"
     private var cancellables = Set<AnyCancellable>()
 
+    private var isLoadingSavedQRCode = false
+
     // SwiftData model context (will be injected)
     var modelContext: ModelContext?
 
@@ -32,7 +34,9 @@ class QRCodeViewModel: ObservableObject {
         // Set up observers for automatic content type switching
         $selectedType
             .sink { [weak self] newType in
-                self?.updateContentType(to: newType)
+                if self?.isLoadingSavedQRCode != true {
+                    self?.updateContentType(to: newType)
+                }
             }
             .store(in: &cancellables)
     }
@@ -106,9 +110,17 @@ class QRCodeViewModel: ObservableObject {
 
     // Load a saved QR code into the current editor
     func loadSavedQRCode(_ savedCode: SavedQRCode) {
-        qrContent = savedCode.content
+        isLoadingSavedQRCode = true
+
         qrStyle = savedCode.style
         selectedType = savedCode.content.typeEnum
+        qrContent = savedCode.content
+
+        DispatchQueue.main.async {
+            self.isLoadingSavedQRCode = false
+        }
+
+        print("Loaded QR Code: Type=\(savedCode.content.typeEnum.rawValue)")
     }
 
     // Export QR code as an image file
@@ -119,6 +131,8 @@ class QRCodeViewModel: ObservableObject {
 
     // Update content type when selected type changes
     private func updateContentType(to newType: QRCodeType) {
+        print("Updating content type to: \(newType.rawValue)")
+
         let currentData: ContentData
 
         switch newType {

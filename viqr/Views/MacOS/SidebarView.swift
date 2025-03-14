@@ -52,7 +52,11 @@ struct SidebarView: View {
                     ForEach(viewModel.savedCodes) { qrCode in
                         HStack {
                             NavigationLink(
-                                destination: SavedQRCodeDetailView(viewModel: viewModel, savedCode: qrCode),
+                                destination: SavedQRCodeDetailView(
+                                    viewModel: viewModel,
+                                    savedCode: qrCode,
+                                    sidebarSelection: $selection
+                                ),
                                 tag: "saved-\(qrCode.id.uuidString)",
                                 selection: $selection
                             ) {
@@ -82,6 +86,7 @@ struct SavedQRCodeDetailView: View {
     @ObservedObject var viewModel: QRCodeViewModel
     let savedCode: SavedQRCode
     @State private var selectedExportFormat: QRCodeExportFormat = .png
+    @Binding var sidebarSelection: String?
 
     var body: some View {
         VStack {
@@ -112,6 +117,7 @@ struct SavedQRCodeDetailView: View {
             HStack {
                 Button("Edit in Editor") {
                     viewModel.loadSavedQRCode(savedCode)
+                    sidebarSelection = "create"
                 }
                 .padding()
 
