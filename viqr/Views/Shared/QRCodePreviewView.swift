@@ -21,110 +21,58 @@ struct QRCodePreviewView: View {
     @State private var exportedFileURL: URL? = nil
 
     var body: some View {
-        VStack(spacing: 20) {
-            Text("Preview")
-                .font(.headline)
-                .padding(.top)
-
-            // QR Code Image Preview
+        #if os(iOS) && canImport(UIKit)
+            // Simplified iOS version
             let qrDocument = viewModel.generateQRCode()
 
-            #if os(iOS) && canImport(UIKit)
+            VStack(spacing: 10) {
+                // QR Code Image Preview only
                 if let uiImage = try? qrDocument.uiImage(CGSize(width: 200, height: 200)) {
                     Image(uiImage: uiImage)
                         .resizable()
                         .interpolation(.none)
                         .scaledToFit()
-                        .frame(width: 200, height: 200)
-                        .padding()
+                        .frame(maxWidth: 220, maxHeight: 220)
                         .background(Color.white)
                         .cornerRadius(10)
                         .shadow(radius: 2)
                 }
-            #elseif os(macOS)
-                if let nsImage = try? qrDocument.nsImage(CGSize(width: 200, height: 200)) {
-                    Image(nsImage: nsImage)
-                        .resizable()
-                        .interpolation(.none)
-                        .scaledToFit()
-                        .frame(width: 200, height: 200)
-                        .padding()
-                        .background(Color.white)
-                        .cornerRadius(10)
-                        .shadow(radius: 2)
-                }
-            #endif
 
-            // Copy as text button
-            Button(action: {
-                #if os(iOS) && canImport(UIKit)
-                    UIPasteboard.general.string = viewModel.qrContent.data.formattedString()
-                #elseif os(macOS)
-                    NSPasteboard.general.clearContents()
-                    NSPasteboard.general.setString(
-                        viewModel.qrContent.data.formattedString(), forType: .string)
-                #endif
-            }) {
-                Text("Copy as text")
-                    .foregroundColor(.blue)
-            }
-            .padding(.bottom)
-
-            // Export Options
-            VStack(alignment: .leading, spacing: 10) {
-                Text("Format")
-                    .font(.subheadline)
-
-                Picker("Format", selection: $selectedExportFormat) {
-                    Text("SVG").tag(QRCodeExportFormat.svg)
-                    Text("PNG").tag(QRCodeExportFormat.png)
-                    Text("PDF").tag(QRCodeExportFormat.pdf)
-                }
-                .pickerStyle(SegmentedPickerStyle())
-                .padding(.bottom)
-
-                // Export Button
+                // Copy as text button (compressed)
                 Button(action: {
-                    #if os(iOS)
-                        showingExportSheet = true
-                    #else
-                        showingExportSheet = true
-                    #endif
+                    UIPasteboard.general.string = viewModel.qrContent.data.formattedString()
                 }) {
-                    Text("Export")
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(Color.orange)
-                        .foregroundColor(.white)
-                        .cornerRadius(10)
+                    Label("Copy Text", systemImage: "doc.on.doc")
+                        .font(.footnote)
+                        .padding(.vertical, 5)
+                        .padding(.horizontal, 10)
+                        .background(Color.blue.opacity(0.1))
+                        .cornerRadius(8)
                 }
             }
-            .padding()
-        }
-        .padding()
-        #if os(iOS) && canImport(UIKit)
+            .padding(.vertical, 5)
             .sheet(isPresented: $showingExportSheet) {
                 VStack(spacing: 20) {
                     Text("Export QR Code Image")
-                    .font(.headline)
+                        .font(.headline)
 
                     // Preview
                     let qrDocument = viewModel.generateQRCode()
                     if let uiImage = (try? qrDocument.uiImage(CGSize(width: 150, height: 150))) {
                         Image(uiImage: uiImage)
-                        .resizable()
-                        .interpolation(.none)
-                        .scaledToFit()
-                        .frame(width: 150, height: 150)
-                        .background(Color.white)
-                        .cornerRadius(10)
-                        .shadow(radius: 2)
+                            .resizable()
+                            .interpolation(.none)
+                            .scaledToFit()
+                            .frame(width: 150, height: 150)
+                            .background(Color.white)
+                            .cornerRadius(10)
+                            .shadow(radius: 2)
                     }
 
                     // Filename field
                     TextField("Filename", text: $exportFileName)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                    .padding(.horizontal)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .padding(.horizontal)
 
                     HStack {
                         Button("Cancel") {
@@ -154,6 +102,63 @@ struct QRCodePreviewView: View {
                 }
             }
         #elseif os(macOS)
+            // Full macOS version remains unchanged
+            VStack(spacing: 20) {
+                Text("Preview")
+                    .font(.headline)
+
+                // QR Code Image Preview
+                let qrDocument = viewModel.generateQRCode()
+                if let nsImage = try? qrDocument.nsImage(CGSize(width: 200, height: 200)) {
+                    Image(nsImage: nsImage)
+                        .resizable()
+                        .interpolation(.none)
+                        .scaledToFit()
+                        .frame(width: 200, height: 200)
+                        .padding()
+                        .background(Color.white)
+                        .cornerRadius(10)
+                        .shadow(radius: 2)
+                }
+
+                // Copy as text button
+                Button(action: {
+                    NSPasteboard.general.clearContents()
+                    NSPasteboard.general.setString(
+                        viewModel.qrContent.data.formattedString(), forType: .string)
+                }) {
+                    Text("Copy as text")
+                        .foregroundColor(.blue)
+                }
+
+                // Export Options
+                VStack(alignment: .leading, spacing: 10) {
+                    Text("Format")
+                        .font(.subheadline)
+
+                    Picker("Format", selection: $selectedExportFormat) {
+                        Text("SVG").tag(QRCodeExportFormat.svg)
+                        Text("PNG").tag(QRCodeExportFormat.png)
+                        Text("PDF").tag(QRCodeExportFormat.pdf)
+                    }
+                    .pickerStyle(SegmentedPickerStyle())
+                    .padding(.bottom)
+
+                    // Export Button
+                    Button(action: {
+                        showingExportSheet = true
+                    }) {
+                        Text("Export")
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(Color.orange)
+                            .foregroundColor(.white)
+                            .cornerRadius(10)
+                    }
+                }
+                .padding()
+            }
+            .padding()
             .sheet(isPresented: $showingExportSheet) {
                 MacExportPanel(viewModel: viewModel, isPresented: $showingExportSheet)
             }
