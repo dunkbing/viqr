@@ -6,16 +6,18 @@
 //
 
 import SwiftUI
+import TikimUI
 
 @main
 struct viqrApp: App {
-    @StateObject private var themeManager = ThemeManager()
+    @StateObject private var themeManager = ThemeManager.shared
 
     var body: some Scene {
         WindowGroup {
             ContentView()
                 .environmentObject(themeManager)
                 .preferredColorScheme(themeManager.colorScheme)
+                .withTheming()
         }
         #if os(macOS)
             .windowStyle(HiddenTitleBarWindowStyle())

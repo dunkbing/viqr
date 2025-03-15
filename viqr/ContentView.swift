@@ -6,19 +6,17 @@
 //
 
 import SwiftUI
+import TikimUI
 
 struct ContentView: View {
-    @EnvironmentObject var themeManager: ThemeManager
 
     var body: some View {
         #if os(macOS)
             MacOSContentView()
                 .frame(minWidth: 1000, minHeight: 600)
                 .background(AppColors.appBackground.ignoresSafeArea())
-                .environmentObject(themeManager)
         #else
             iOSContentView()
-                .environmentObject(themeManager)
                 .onAppear {
                     applyThemeToTabBar()
                 }
@@ -56,5 +54,5 @@ struct ContentView: View {
 
 #Preview {
     ContentView()
-        .environmentObject(ThemeManager())
+        .environmentObject(ThemeManager.shared)
 }
