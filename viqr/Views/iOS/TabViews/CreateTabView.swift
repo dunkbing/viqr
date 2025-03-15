@@ -39,8 +39,6 @@ import SwiftUI
 
     struct CreateTabView: View {
         @ObservedObject var viewModel: QRCodeViewModel
-        @State private var showingContentSheet = false
-        @State private var showingStyleSheet = false
         @State private var showingSaveSheet = false
         @State private var showingExportSheet = false
         @State private var qrCodeName = ""
@@ -48,125 +46,76 @@ import SwiftUI
         @State private var exportFileName = ""
         @State private var showingShareSheet = false
         @State private var exportedFileURL: URL? = nil
+        @State private var selectedTab = 0
 
         var body: some View {
             NavigationView {
-                VStack(spacing: 0) {
-                    // Type Selection
-                    ScrollView(.horizontal, showsIndicators: false) {
+                ScrollView {
+                    VStack(spacing: 16) {
+                        // Type Selection
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack(spacing: 15) {
+                                ForEach(QRCodeType.allCases) { type in
+                                    TypeButton(type: type, selectedType: $viewModel.selectedType)
+                                }
+                            }
+                            .padding(.horizontal)
+                        }
+                        .padding(.top, 8)
+
+                        // Preview
+                        QRCodePreviewView(viewModel: viewModel)
+
+                        // Action Buttons
                         HStack(spacing: 15) {
-                            ForEach(QRCodeType.allCases) { type in
-                                TypeButton(type: type, selectedType: $viewModel.selectedType)
+                            ActionButton(
+                                title: "Save", systemImage: "square.and.arrow.down", color: .green
+                            ) {
+                                showingSaveSheet = true
+                            }
+
+                            ActionButton(
+                                title: "Export", systemImage: "arrow.up.doc", color: .orange
+                            ) {
+                                exportFileName = "QRCode"
+                                showingExportSheet = true
                             }
                         }
-                        .padding(.horizontal)
-                    }
-                    .padding(.top, 8)
+                        .padding()
 
-                    Spacer(minLength: 10)
-
-                    // Preview - using GeometryReader to adjust size dynamically
-                    GeometryReader { geometry in
                         VStack {
-                            Spacer()
-                            QRCodePreviewView(viewModel: viewModel)
-                                .frame(maxWidth: geometry.size.width - 32)
-                            Spacer()
+                            HStack {
+                                TabButton(
+                                    title: "Content", systemImage: "doc.text",
+                                    isSelected: selectedTab == 0
+                                ) {
+                                    selectedTab = 0
+                                }
+
+                                TabButton(
+                                    title: "Style", systemImage: "paintbrush",
+                                    isSelected: selectedTab == 1
+                                ) {
+                                    selectedTab = 1
+                                }
+                            }
+                            .padding(.horizontal)
+
+                            if selectedTab == 0 {
+                                iOSEditorView(viewModel: viewModel)
+                                    .transition(.opacity)
+                            } else {
+                                iOSStyleEditorView(viewModel: viewModel)
+                                    .transition(.opacity)
+                            }
                         }
-                        .frame(width: geometry.size.width)
+                        .background(Color.gray.opacity(0.05))
+                        .cornerRadius(12)
+                        .padding(.horizontal, 8)
                     }
-
-                    // Action Buttons
-                    HStack(spacing: 10) {
-                        Button(action: {
-                            showingContentSheet = true
-                        }) {
-                            VStack {
-                                Image(systemName: "doc.text")
-                                    .font(.system(size: 20))
-                                Text("Content")
-                                    .font(.caption2)
-                            }
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 8)
-                            .background(Color.blue.opacity(0.1))
-                            .cornerRadius(10)
-                        }
-
-                        Button(action: {
-                            showingStyleSheet = true
-                        }) {
-                            VStack {
-                                Image(systemName: "paintbrush")
-                                    .font(.system(size: 20))
-                                Text("Style")
-                                    .font(.caption2)
-                            }
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 8)
-                            .background(Color.purple.opacity(0.1))
-                            .cornerRadius(10)
-                        }
-
-                        Button(action: {
-                            showingSaveSheet = true
-                        }) {
-                            VStack {
-                                Image(systemName: "square.and.arrow.down")
-                                    .font(.system(size: 20))
-                                Text("Save")
-                                    .font(.caption2)
-                            }
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 8)
-                            .background(Color.green.opacity(0.1))
-                            .cornerRadius(10)
-                        }
-
-                        Button(action: {
-                            exportFileName = "QRCode"
-                            showingExportSheet = true
-                        }) {
-                            VStack {
-                                Image(systemName: "arrow.up.doc")
-                                    .font(.system(size: 20))
-                                Text("Export")
-                                    .font(.caption2)
-                            }
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 8)
-                            .background(Color.orange.opacity(0.1))
-                            .cornerRadius(10)
-                        }
-                    }
-                    .padding(.horizontal)
-                    .padding(.bottom, 16)  // Add extra padding at the bottom to avoid tab bar
                 }
                 .navigationTitle("QR Studio")
-                .safeAreaInset(edge: .bottom) {  // Add safe area inset to respect tab bar
-                    Color.clear.frame(height: 0)
-                }
-                // Rest of the sheets remain unchanged
-                .sheet(isPresented: $showingContentSheet) {
-                    NavigationView {
-                        iOSEditorView(viewModel: viewModel)
-                            .navigationTitle("Edit Content")
-                            .navigationBarItems(
-                                trailing: Button("Done") {
-                                    showingContentSheet = false
-                                })
-                    }
-                }
-                .sheet(isPresented: $showingStyleSheet) {
-                    NavigationView {
-                        iOSStyleEditorView(viewModel: viewModel)
-                            .navigationTitle("Edit Style")
-                            .navigationBarItems(
-                                trailing: Button("Done") {
-                                    showingStyleSheet = false
-                                })
-                    }
-                }
+                .navigationBarHidden(true)
                 .sheet(isPresented: $showingSaveSheet) {
                     VStack(spacing: 20) {
                         Text("Save QR Code")
@@ -259,6 +208,55 @@ import SwiftUI
                         ShareSheet(items: [url])
                     }
                 }
+            }
+        }
+    }
+
+    // Tab Button component
+    struct TabButton: View {
+        let title: String
+        let systemImage: String
+        let isSelected: Bool
+        let action: () -> Void
+
+        var body: some View {
+            Button(action: action) {
+                HStack {
+                    Image(systemName: systemImage)
+                    Text(title)
+                }
+                .font(isSelected ? .subheadline.bold() : .subheadline)
+                .padding(.vertical, 8)
+                .padding(.horizontal, 16)
+                .background(isSelected ? Color.blue.opacity(0.1) : Color.clear)
+                .foregroundColor(isSelected ? .blue : .primary)
+                .cornerRadius(8)
+                .animation(.easeInOut(duration: 0.2), value: isSelected)
+            }
+            .buttonStyle(PlainButtonStyle())
+            .frame(maxWidth: .infinity)
+        }
+    }
+
+    // Action Button component
+    struct ActionButton: View {
+        let title: String
+        let systemImage: String
+        let color: Color
+        let action: () -> Void
+
+        var body: some View {
+            Button(action: action) {
+                HStack {
+                    Image(systemName: systemImage)
+                    Text(title)
+                }
+                .font(.headline)
+                .frame(maxWidth: .infinity)
+                .padding()
+                .background(color.opacity(0.8))
+                .foregroundColor(.white)
+                .cornerRadius(10)
             }
         }
     }

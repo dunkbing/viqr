@@ -116,11 +116,13 @@ extension Color {
     }
 
     static var appBackground: Color {
-        AppColors.dynamicColor(light: CatppuccinColors.Latte.base, dark: CatppuccinColors.Macchiato.base)
+        AppColors.dynamicColor(
+            light: CatppuccinColors.Latte.base, dark: CatppuccinColors.Macchiato.base)
     }
 
     static var appText: Color {
-        AppColors.dynamicColor(light: CatppuccinColors.Latte.text, dark: CatppuccinColors.Macchiato.text)
+        AppColors.dynamicColor(
+            light: CatppuccinColors.Latte.text, dark: CatppuccinColors.Macchiato.text)
     }
 
     static var appSubtitle: Color {
@@ -129,27 +131,33 @@ extension Color {
     }
 
     static var appAccent: Color {
-        AppColors.dynamicColor(light: CatppuccinColors.Latte.blue, dark: CatppuccinColors.Macchiato.blue)
+        AppColors.dynamicColor(
+            light: CatppuccinColors.Latte.blue, dark: CatppuccinColors.Macchiato.blue)
     }
 
     static var appSecondaryAccent: Color {
-        AppColors.dynamicColor(light: CatppuccinColors.Latte.mauve, dark: CatppuccinColors.Macchiato.mauve)
+        AppColors.dynamicColor(
+            light: CatppuccinColors.Latte.mauve, dark: CatppuccinColors.Macchiato.mauve)
     }
 
     static var appGreen: Color {
-        AppColors.dynamicColor(light: CatppuccinColors.Latte.green, dark: CatppuccinColors.Macchiato.green)
+        AppColors.dynamicColor(
+            light: CatppuccinColors.Latte.green, dark: CatppuccinColors.Macchiato.green)
     }
 
     static var appRed: Color {
-        AppColors.dynamicColor(light: CatppuccinColors.Latte.red, dark: CatppuccinColors.Macchiato.red)
+        AppColors.dynamicColor(
+            light: CatppuccinColors.Latte.red, dark: CatppuccinColors.Macchiato.red)
     }
 
     static var appOrange: Color {
-        AppColors.dynamicColor(light: CatppuccinColors.Latte.peach, dark: CatppuccinColors.Macchiato.peach)
+        AppColors.dynamicColor(
+            light: CatppuccinColors.Latte.peach, dark: CatppuccinColors.Macchiato.peach)
     }
 
     static var appYellow: Color {
-        AppColors.dynamicColor(light: CatppuccinColors.Latte.yellow, dark: CatppuccinColors.Macchiato.yellow)
+        AppColors.dynamicColor(
+            light: CatppuccinColors.Latte.yellow, dark: CatppuccinColors.Macchiato.yellow)
     }
 
     static var appSurface: Color {
@@ -168,11 +176,13 @@ extension Color {
     }
 
     static var appCrust: Color {
-        AppColors.dynamicColor(light: CatppuccinColors.Latte.crust, dark: CatppuccinColors.Macchiato.crust)
+        AppColors.dynamicColor(
+            light: CatppuccinColors.Latte.crust, dark: CatppuccinColors.Macchiato.crust)
     }
 
     static var appMantle: Color {
-        AppColors.dynamicColor(light: CatppuccinColors.Latte.mantle, dark: CatppuccinColors.Macchiato.mantle)
+        AppColors.dynamicColor(
+            light: CatppuccinColors.Latte.mantle, dark: CatppuccinColors.Macchiato.mantle)
     }
 }
 

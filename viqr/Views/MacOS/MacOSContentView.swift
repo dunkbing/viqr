@@ -29,11 +29,16 @@ import SwiftUI
                     } else if selectedSidebar?.starts(with: "saved-") ?? false {
                         // Handle saved QR code selection
                         if let uuid = selectedSidebar?.replacingOccurrences(of: "saved-", with: ""),
-                           let savedCode = viewModel.savedCodes.first(where: { $0.id.uuidString == uuid }) {
-                            SavedQRCodeDetailView(viewModel: viewModel,
-                                                  savedCode: savedCode,
-                                                  sidebarSelection: $selectedSidebar)
-                                .environmentObject(themeManager)
+                            let savedCode = viewModel.savedCodes.first(where: {
+                                $0.id.uuidString == uuid
+                            })
+                        {
+                            SavedQRCodeDetailView(
+                                viewModel: viewModel,
+                                savedCode: savedCode,
+                                sidebarSelection: $selectedSidebar
+                            )
+                            .environmentObject(themeManager)
                         } else {
                             // Fallback view when a saved code isn't found
                             Text("QR Code not found")
