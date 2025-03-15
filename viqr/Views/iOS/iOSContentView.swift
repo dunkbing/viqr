@@ -7,6 +7,7 @@
 
 import SwiftUI
 
+#if os(iOS)
 struct iOSContentView: View {
     @StateObject var viewModel = QRCodeViewModel()
     @EnvironmentObject var themeManager: ThemeManager
@@ -50,3 +51,4 @@ struct iOSContentView: View {
         UINavigationBar.appearance().tintColor = UIColor(AppColors.appAccent)
     }
 }
+#endif

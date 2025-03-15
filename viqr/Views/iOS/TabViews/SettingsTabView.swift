@@ -8,6 +8,7 @@
 import QRCode
 import SwiftUI
 
+#if os(iOS)
 struct SettingsTabView: View {
     @ObservedObject var viewModel: QRCodeViewModel
     @AppStorage("defaultQRCodeType") private var defaultQRCodeType = "Link"
@@ -207,3 +208,4 @@ struct FeatureRow: View {
         .padding(.vertical, 4)
     }
 }
+#endif

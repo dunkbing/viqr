@@ -114,6 +114,66 @@ extension Color {
             opacity: Double(a) / 255
         )
     }
+
+    static var appBackground: Color {
+        AppColors.dynamicColor(light: CatppuccinColors.Latte.base, dark: CatppuccinColors.Macchiato.base)
+    }
+
+    static var appText: Color {
+        AppColors.dynamicColor(light: CatppuccinColors.Latte.text, dark: CatppuccinColors.Macchiato.text)
+    }
+
+    static var appSubtitle: Color {
+        AppColors.dynamicColor(
+            light: CatppuccinColors.Latte.subtext0, dark: CatppuccinColors.Macchiato.subtext0)
+    }
+
+    static var appAccent: Color {
+        AppColors.dynamicColor(light: CatppuccinColors.Latte.blue, dark: CatppuccinColors.Macchiato.blue)
+    }
+
+    static var appSecondaryAccent: Color {
+        AppColors.dynamicColor(light: CatppuccinColors.Latte.mauve, dark: CatppuccinColors.Macchiato.mauve)
+    }
+
+    static var appGreen: Color {
+        AppColors.dynamicColor(light: CatppuccinColors.Latte.green, dark: CatppuccinColors.Macchiato.green)
+    }
+
+    static var appRed: Color {
+        AppColors.dynamicColor(light: CatppuccinColors.Latte.red, dark: CatppuccinColors.Macchiato.red)
+    }
+
+    static var appOrange: Color {
+        AppColors.dynamicColor(light: CatppuccinColors.Latte.peach, dark: CatppuccinColors.Macchiato.peach)
+    }
+
+    static var appYellow: Color {
+        AppColors.dynamicColor(light: CatppuccinColors.Latte.yellow, dark: CatppuccinColors.Macchiato.yellow)
+    }
+
+    static var appSurface: Color {
+        AppColors.dynamicColor(
+            light: CatppuccinColors.Latte.surface0, dark: CatppuccinColors.Macchiato.surface0)
+    }
+
+    static var appSurface1: Color {
+        AppColors.dynamicColor(
+            light: CatppuccinColors.Latte.surface1, dark: CatppuccinColors.Macchiato.surface1)
+    }
+
+    static var appSurface2: Color {
+        AppColors.dynamicColor(
+            light: CatppuccinColors.Latte.surface2, dark: CatppuccinColors.Macchiato.surface2)
+    }
+
+    static var appCrust: Color {
+        AppColors.dynamicColor(light: CatppuccinColors.Latte.crust, dark: CatppuccinColors.Macchiato.crust)
+    }
+
+    static var appMantle: Color {
+        AppColors.dynamicColor(light: CatppuccinColors.Latte.mantle, dark: CatppuccinColors.Macchiato.mantle)
+    }
 }
 
 class AppColors {
