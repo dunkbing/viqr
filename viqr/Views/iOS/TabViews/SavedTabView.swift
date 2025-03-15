@@ -18,32 +18,56 @@ struct SavedTabView: View {
     @State private var itemToDelete: IndexSet?
 
     var body: some View {
-        NavigationView {
-            VStack {
+        ScrollView {
+            VStack(spacing: 16) {
+                // Header
+                HStack {
+                    Text("Saved QR Codes")
+                        .font(.largeTitle)
+                        .fontWeight(.bold)
+                        .foregroundColor(Color.appText)
+                    Spacer()
+                }
+                .padding(.horizontal)
+                .padding(.top, 10)
+
                 if viewModel.savedCodes.isEmpty {
-                    VStack {
+                    VStack(spacing: 20) {
                         Image(systemName: "tray")
                             .font(.system(size: 60))
-                            .foregroundColor(.gray)
+                            .foregroundColor(Color.appSubtitle)
                             .padding()
 
                         Text("No Saved QR Codes")
                             .font(.title2)
+                            .foregroundColor(Color.appText)
 
                         Text("Create and save QR codes in the Create tab")
-                            .foregroundColor(.gray)
+                            .foregroundColor(Color.appSubtitle)
                             .multilineTextAlignment(.center)
                             .padding()
+
+                        Image(systemName: "arrow.down")
+                            .font(.system(size: 24))
+                            .foregroundColor(Color.appSubtitle)
+                            .padding()
                     }
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 40)
+                    .background(
+                        RoundedRectangle(cornerRadius: 20)
+                            .fill(Color.appSurface1.opacity(0.5))
+                    )
+                    .padding(.horizontal)
                 } else {
-                    List {
+                    // Saved QR codes list
+                    VStack(spacing: 12) {
                         ForEach(viewModel.savedCodes) { qrCode in
                             NavigationLink(
                                 destination: SavedQRDetailView(
                                     viewModel: viewModel, savedCode: qrCode)
                             ) {
-                                HStack {
+                                HStack(spacing: 16) {
                                     // Generate a small preview
                                     let qrDocument = QRCodeGenerator.generateQRCode(
                                         from: qrCode.content,
@@ -59,14 +83,18 @@ struct SavedTabView: View {
                                                     .resizable()
                                                     .frame(width: 60, height: 60)
                                                     .background(Color.white)
-                                                    .cornerRadius(8)
+                                                    .cornerRadius(12)
+                                                    .shadow(
+                                                        color: Color.black.opacity(0.1), radius: 2,
+                                                        x: 0, y: 1)
                                             } else {
                                                 // Fallback if QR code generation fails
                                                 Image(systemName: "qrcode")
                                                     .resizable()
                                                     .frame(width: 60, height: 60)
+                                                    .foregroundColor(Color.appAccent)
                                                     .background(Color.white)
-                                                    .cornerRadius(8)
+                                                    .cornerRadius(12)
                                             }
                                         }
                                     #else
@@ -74,53 +102,69 @@ struct SavedTabView: View {
                                         Image(systemName: "qrcode")
                                             .resizable()
                                             .frame(width: 60, height: 60)
+                                            .foregroundColor(Color.appAccent)
                                             .background(Color.white)
-                                            .cornerRadius(8)
+                                            .cornerRadius(12)
                                     #endif
 
                                     VStack(alignment: .leading, spacing: 4) {
                                         Text(qrCode.name)
                                             .font(.headline)
+                                            .foregroundColor(Color.appText)
 
                                         Text(qrCode.content.typeEnum.rawValue)
                                             .font(.subheadline)
-                                            .foregroundColor(.gray)
+                                            .foregroundColor(Color.appSubtitle)
 
                                         Text(formattedDate(qrCode.dateCreated))
                                             .font(.caption)
-                                            .foregroundColor(.gray)
+                                            .foregroundColor(Color.appSubtitle)
                                     }
-                                    .padding(.leading, 8)
+
+                                    Spacer()
+
+                                    Image(systemName: "chevron.right")
+                                        .foregroundColor(Color.appSubtitle)
                                 }
-                                .padding(.vertical, 4)
+                                .padding(16)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 16)
+                                        .fill(Color.appSurface1)
+                                )
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 16)
+                                        .stroke(Color.appSurface2, lineWidth: 1)
+                                )
                             }
+                            .buttonStyle(PlainButtonStyle())
                         }
-                        .onDelete { indexSet in
-                            itemToDelete = indexSet
-                            showingDeleteAlert = true
-                        }
+                        .padding(.horizontal)
                     }
-                    .listStyle(PlainListStyle())
+                    .padding(.bottom, 100)  // Extra padding for the tab bar
                 }
             }
-            .navigationTitle("Saved QR Codes")
-            .alert(isPresented: $showingDeleteAlert) {
-                Alert(
-                    title: Text("Delete QR Code"),
-                    message: Text(
-                        "Are you sure you want to delete this QR code? This action cannot be undone."
-                    ),
-                    primaryButton: .destructive(Text("Delete")) {
-                        if let indexSet = itemToDelete {
-                            viewModel.deleteSavedQRCode(at: indexSet)
-                            itemToDelete = nil
-                        }
-                    },
-                    secondaryButton: .cancel {
+        }
+        .background(Color.appBackground.ignoresSafeArea())
+        .alert(isPresented: $showingDeleteAlert) {
+            Alert(
+                title: Text("Delete QR Code"),
+                message: Text(
+                    "Are you sure you want to delete this QR code? This action cannot be undone."
+                ),
+                primaryButton: .destructive(Text("Delete")) {
+                    if let indexSet = itemToDelete {
+                        viewModel.deleteSavedQRCode(at: indexSet)
                         itemToDelete = nil
                     }
-                )
-            }
+                },
+                secondaryButton: .cancel {
+                    itemToDelete = nil
+                }
+            )
+        }
+        .onDrag {
+            showingDeleteAlert = true
+            return NSItemProvider(object: "delete" as NSString)
         }
     }
 
@@ -141,9 +185,10 @@ struct DetailRow: View {
             Text(label + ":")
                 .fontWeight(.medium)
                 .frame(width: 80, alignment: .leading)
+                .foregroundColor(Color.appText)
 
             Text(value)
-                .foregroundColor(.secondary)
+                .foregroundColor(Color.appSubtitle)
 
             Spacer()
         }

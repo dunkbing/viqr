@@ -30,16 +30,16 @@ struct ContentView: View {
         private func applyThemeToTabBar() {
             let appearance = UITabBarAppearance()
             //        appearance.configureWithOpaluescence()
-            appearance.backgroundColor = UIColor(AppColors.appMantle)
+            appearance.backgroundColor = UIColor(Color.appMantle)
 
             let tabBarItemAppearance = UITabBarItemAppearance()
-            tabBarItemAppearance.normal.iconColor = UIColor(AppColors.appSubtitle)
+            tabBarItemAppearance.normal.iconColor = UIColor(Color.appSubtitle)
             tabBarItemAppearance.normal.titleTextAttributes = [
-                .foregroundColor: UIColor(AppColors.appSubtitle)
+                .foregroundColor: UIColor(Color.appSubtitle)
             ]
-            tabBarItemAppearance.selected.iconColor = UIColor(AppColors.appAccent)
+            tabBarItemAppearance.selected.iconColor = UIColor(Color.appAccent)
             tabBarItemAppearance.selected.titleTextAttributes = [
-                .foregroundColor: UIColor(AppColors.appAccent)
+                .foregroundColor: UIColor(Color.appAccent)
             ]
 
             appearance.stackedLayoutAppearance = tabBarItemAppearance

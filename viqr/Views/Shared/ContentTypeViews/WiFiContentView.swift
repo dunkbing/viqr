@@ -5,8 +5,8 @@
 //  Created by Bùi Đặng Bình on 13/3/25.
 //
 
-import SwiftUI
 import CoreLocation
+import SwiftUI
 
 struct WiFiContentView: View {
     @Binding var content: QRCodeContent
@@ -38,14 +38,14 @@ struct WiFiContentView: View {
 
                         Button(action: {
                             #if os(iOS)
-                            let status = CLLocationManager().authorizationStatus
-                            if status == .denied || status == .restricted {
-                                showLocationPermissionAlert = true
-                            } else {
-                                wifiManager.requestWiFiInfo()
-                            }
+                                let status = CLLocationManager().authorizationStatus
+                                if status == .denied || status == .restricted {
+                                    showLocationPermissionAlert = true
+                                } else {
+                                    wifiManager.requestWiFiInfo()
+                                }
                             #else
-                            wifiManager.requestWiFiInfo()
+                                wifiManager.requestWiFiInfo()
                             #endif
                         }) {
                             Image(systemName: "arrow.clockwise")
@@ -148,9 +148,9 @@ struct WiFiContentView: View {
             .foregroundColor(.gray)
 
             #if os(iOS)
-            Text("Note: Loading current WiFi requires location permission.")
-                .font(.caption)
-                .foregroundColor(.orange)
+                Text("Note: Loading current WiFi requires location permission.")
+                    .font(.caption)
+                    .foregroundColor(.orange)
             #endif
         }
         .padding()
@@ -170,11 +170,13 @@ struct WiFiContentView: View {
             Alert(
                 title: Text("Location Permission Needed"),
                 message: Text("To detect the current WiFi network, location access is required."),
-                primaryButton: .default(Text("Settings"), action: {
-                    if let url = URL(string: UIApplication.openSettingsURLString) {
-                        UIApplication.shared.open(url)
-                    }
-                }),
+                primaryButton: .default(
+                    Text("Settings"),
+                    action: {
+                        if let url = URL(string: UIApplication.openSettingsURLString) {
+                            UIApplication.shared.open(url)
+                        }
+                    }),
                 secondaryButton: .cancel()
             )
         }
