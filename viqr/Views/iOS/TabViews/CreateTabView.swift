@@ -123,9 +123,11 @@ import TikimUI
                     )
                     .padding(.horizontal)
                     .padding(.bottom, 100)
+                    .keyboardAware()
                 }
             }
             .background(Color.appBackground.ignoresSafeArea())
+            .dismissKeyboardOnTap()
             .sheet(isPresented: $showingSaveSheet) {
                 VStack(spacing: 20) {
                     Text("Save QR Code")

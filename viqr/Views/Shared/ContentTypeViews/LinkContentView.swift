@@ -24,9 +24,11 @@ struct LinkContentView: View {
                     )
                 )
                 .textFieldStyle(RoundedBorderTextFieldStyle())
-                //                .autocapitalization(.none)
                 .disableAutocorrection(true)
-                //                .keyboardType(.URL)
+                #if os(iOS)
+                    .autocapitalization(.none)
+                    .keyboardType(.URL)
+                #endif
             }
 
             Text("Tip: Include 'https://' for proper linking.")

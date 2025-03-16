@@ -145,6 +145,11 @@ struct VCardContentView: View {
             }
             .padding()
         }
+        .padding()
+        #if os(iOS)
+            .background(Color.appSurface.opacity(0.5))
+            .cornerRadius(10)
+        #endif
     }
 
     // Helper method to update vCard fields while preserving other values
@@ -164,7 +169,6 @@ struct VCardContentView: View {
             let currPhone, let currEmail, let currAddress, let currWebsite, let currNote) = content
             .data
         {
-
             content.data = .vCard(
                 firstName: firstName ?? currFirstName,
                 lastName: lastName ?? currLastName,

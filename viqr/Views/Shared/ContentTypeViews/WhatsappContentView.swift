@@ -27,7 +27,9 @@ struct WhatsappContentView: View {
                         )
                     )
                     .textFieldStyle(RoundedBorderTextFieldStyle())
-                    //                    .keyboardType(.phonePad)
+                    #if os(iOS)
+                        .keyboardType(.phonePad)
+                    #endif
 
                     Text("Pre-filled Message (optional)")
                         .font(.subheadline)
@@ -70,5 +72,9 @@ struct WhatsappContentView: View {
             .foregroundColor(.orange)
         }
         .padding()
+        #if os(iOS)
+            .background(Color.appSurface.opacity(0.5))
+            .cornerRadius(10)
+        #endif
     }
 }

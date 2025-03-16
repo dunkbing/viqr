@@ -28,9 +28,11 @@ struct EmailContentView: View {
                         )
                     )
                     .textFieldStyle(RoundedBorderTextFieldStyle())
-                    //                    .keyboardType(.emailAddress)
-                    //                    .autocapitalization(.none)
                     .disableAutocorrection(true)
+                    #if os(iOS)
+                        .keyboardType(.emailAddress)
+                        .autocapitalization(.none)
+                    #endif
 
                     TextField(
                         "Subject (optional)",
@@ -74,9 +76,11 @@ struct EmailContentView: View {
                 }
             }
 
-            Text("The QR code will open the default email client with these details pre-filled.")
-                .font(.caption)
-                .foregroundColor(.gray)
+            Text(
+                "The QR code will open the default email client with these details pre-filled."
+            )
+            .font(.caption)
+            .foregroundColor(.gray)
         }
         .padding()
     }

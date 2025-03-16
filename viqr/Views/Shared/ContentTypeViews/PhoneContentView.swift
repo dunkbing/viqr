@@ -24,7 +24,9 @@ struct PhoneContentView: View {
                     )
                 )
                 .textFieldStyle(RoundedBorderTextFieldStyle())
-                //                .keyboardType(.phonePad)
+                #if os(iOS)
+                    .keyboardType(.phonePad)
+                #endif
             }
 
             Text("Include the country code for international numbers (e.g., +1 for USA).")
