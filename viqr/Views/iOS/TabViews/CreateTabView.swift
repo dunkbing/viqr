@@ -17,10 +17,19 @@ import TikimUI
     struct TypeButton: View {
         let type: QRCodeType
         @Binding var selectedType: QRCodeType
+        let isEnabled: Bool
+
+        init(type: QRCodeType, selectedType: Binding<QRCodeType>, isEnabled: Bool = true) {
+            self.type = type
+            self._selectedType = selectedType
+            self.isEnabled = isEnabled
+        }
 
         var body: some View {
             Button(action: {
-                selectedType = type
+                if isEnabled {
+                    selectedType = type
+                }
             }) {
                 HStack(spacing: 8) {
                     Image(systemName: type.icon)
@@ -32,14 +41,19 @@ import TikimUI
                 }
                 .padding(.vertical, 8)
                 .padding(.horizontal, 12)
-                .foregroundColor(selectedType == type ? .white : Color.appAccent)
+                .foregroundColor(
+                    selectedType == type ? .white : isEnabled ? Color.appAccent : Color.appSubtitle
+                )
                 .background(
                     selectedType == type
-                        ? Color.appSecondaryAccent : Color.appSecondaryAccent.opacity(0.1)
+                        ? Color.appSecondaryAccent
+                        : isEnabled ? Color.appSecondaryAccent.opacity(0.1) : Color.appSurface2
                 )
                 .cornerRadius(8)
+                .opacity(isEnabled ? 1.0 : 0.7)
             }
             .buttonStyle(BouncyButtonStyle())
+            .disabled(!isEnabled)
         }
     }
 
@@ -54,9 +68,56 @@ import TikimUI
         @State private var exportedFileURL: URL? = nil
         @State private var selectedTab = 0
 
+        // New state for edit mode
+        @State private var isEditMode = false
+        @State private var originalQRCode: SavedQRCode?
+        @State private var editedQRCodeName = ""
+        @Environment(\.presentationMode) var presentationMode
+
+        // Initialize for creating a new QR code
+        init(viewModel: QRCodeViewModel) {
+            self.viewModel = viewModel
+            self._isEditMode = State(initialValue: false)
+        }
+
+        // Initialize for editing an existing QR code
+        init(viewModel: QRCodeViewModel, editQRCode: SavedQRCode) {
+            self.viewModel = viewModel
+            self._isEditMode = State(initialValue: true)
+            self._originalQRCode = State(initialValue: editQRCode)
+            self._editedQRCodeName = State(initialValue: editQRCode.name)
+            self._qrCodeName = State(initialValue: editQRCode.name)
+        }
+
         var body: some View {
             KeyboardAwareScrollView {
                 VStack(spacing: 20) {
+                    // Header based on mode
+                    HStack {
+                        Text(isEditMode ? "Edit QR Code" : "Create QR Code")
+                            .font(.title2)
+                            .fontWeight(.bold)
+                            .foregroundColor(Color.appText)
+
+                        Spacer()
+
+                        if isEditMode {
+                            Button(action: cancelEdit) {
+                                Text("Cancel")
+                                    .foregroundColor(Color.appRed)
+                            }
+                            .padding(.trailing, 8)
+
+                            Button(action: saveEditedQRCode) {
+                                Text("Save")
+                                    .fontWeight(.semibold)
+                                    .foregroundColor(Color.appGreen)
+                            }
+                        }
+                    }
+                    .padding(.horizontal)
+                    .padding(.top)
+
                     // Preview
                     QRCodePreviewView(viewModel: viewModel)
                         .frame(height: 250)
@@ -67,31 +128,36 @@ import TikimUI
                                 .shadow(color: Color.black.opacity(0.05), radius: 10, x: 0, y: 5)
                         )
                         .padding(.horizontal)
-                        .padding(.top)
 
-                    // Action Buttons
-                    HStack(spacing: 15) {
-                        ActionButton(
-                            title: "Save", systemImage: "square.and.arrow.down",
-                            color: Color.appGreen
-                        ) {
-                            showingSaveSheet = true
-                        }
+                    // Action Buttons - Only show when not in edit mode
+                    if !isEditMode {
+                        HStack(spacing: 15) {
+                            ActionButton(
+                                title: "Save", systemImage: "square.and.arrow.down",
+                                color: Color.appGreen
+                            ) {
+                                showingSaveSheet = true
+                            }
 
-                        ActionButton(
-                            title: "Export", systemImage: "arrow.up.doc", color: Color.appOrange
-                        ) {
-                            exportFileName = "QRCode"
-                            showingExportSheet = true
+                            ActionButton(
+                                title: "Export", systemImage: "arrow.up.doc", color: Color.appOrange
+                            ) {
+                                exportFileName = "QRCode"
+                                showingExportSheet = true
+                            }
                         }
+                        .padding(.horizontal)
                     }
-                    .padding(.horizontal)
 
-                    // Type Selection
+                    // Type Selection - Disabled in edit mode for certain QR code types
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: 16) {
                             ForEach(QRCodeType.allCases) { type in
-                                TypeButton(type: type, selectedType: $viewModel.selectedType)
+                                TypeButton(
+                                    type: type,
+                                    selectedType: $viewModel.selectedType,
+                                    isEnabled: !isEditMode || viewModel.canChangeType
+                                )
                             }
                         }
                         .padding(.horizontal, 16)
@@ -128,6 +194,7 @@ import TikimUI
             }
             .background(Color.appBackground.ignoresSafeArea())
             .dismissKeyboardOnTap()
+            .navigationBarHidden(true)
             .sheet(isPresented: $showingSaveSheet) {
                 VStack(spacing: 20) {
                     Text("Save QR Code")
@@ -221,7 +288,31 @@ import TikimUI
                     ShareSheet(items: [url])
                 }
             }
+            .onAppear {
+                if isEditMode, let originalQRCode = originalQRCode {
+                    // Load the QR code data for editing
+                    viewModel.loadSavedQRCode(originalQRCode)
+                }
+            }
             .background(Color.appBackground.ignoresSafeArea())
+        }
+
+        // Save the edited QR code
+        private func saveEditedQRCode() {
+            guard let originalQRCode = originalQRCode else { return }
+
+            // Update the saved QR code with the current values
+            viewModel.updateSavedQRCode(
+                originalID: originalQRCode.id,
+                name: editedQRCodeName.isEmpty ? originalQRCode.name : editedQRCodeName
+            )
+
+            // Dismiss the view
+            presentationMode.wrappedValue.dismiss()
+        }
+
+        private func cancelEdit() {
+            presentationMode.wrappedValue.dismiss()
         }
     }
 

@@ -16,6 +16,8 @@ struct SavedQRDetailView: View {
     @State private var exportedFileURL: URL? = nil
     @State private var selectedExportFormat: QRCodeExportFormat = .png
     @State private var exportFileName: String = ""
+    @State private var showingDeleteAlert = false
+    @State private var showingEditSheet = false
     @Environment(\.presentationMode) var presentationMode
 
     var body: some View {
@@ -105,10 +107,11 @@ struct SavedQRDetailView: View {
                 // Action Buttons
                 VStack(spacing: 15) {
                     Button(action: {
+                        // Load the QR code into the viewModel before showing the edit sheet
                         viewModel.loadSavedQRCode(savedCode)
-                        presentationMode.wrappedValue.dismiss()
+                        showingEditSheet = true
                     }) {
-                        Label("Edit in Creator", systemImage: "pencil")
+                        Label("Edit QR Code", systemImage: "pencil")
                             .frame(maxWidth: .infinity)
                             .padding()
                             .background(Color.blue)
@@ -143,11 +146,47 @@ struct SavedQRDetailView: View {
                             .foregroundColor(.white)
                             .cornerRadius(10)
                     }
+
+                    Button(action: {
+                        showingDeleteAlert = true
+                    }) {
+                        Label("Delete", systemImage: "trash")
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(Color.red)
+                            .foregroundColor(.white)
+                            .cornerRadius(10)
+                    }
                 }
                 .padding()
             }
         }
+        .navigationTitle("QR Code Details")
+        .navigationBarTitleDisplayMode(.inline)
+        .onAppear {
+            // Hide the tab bar when this view appears
+            NotificationCenter.default.post(
+                name: NSNotification.Name("TabBarVisibility"), object: nil,
+                userInfo: ["isVisible": false])
+        }
+        .onDisappear {
+            // Show the tab bar when this view disappears
+            NotificationCenter.default.post(
+                name: NSNotification.Name("TabBarVisibility"), object: nil,
+                userInfo: ["isVisible": true])
+        }
         #if os(iOS)
+            .sheet(isPresented: $showingEditSheet) {
+                // Use a NavigationView to have a proper toolbar in the sheet
+                NavigationView {
+                    QRCodeEditView(
+                        viewModel: viewModel, originalCode: savedCode,
+                        isPresented: $showingEditSheet
+                    )
+                    .navigationBarTitleDisplayMode(.inline)
+                }
+                .accentColor(Color.appAccent)  // Apply accent color to navigation bar
+            }
             .sheet(isPresented: $showingExportSheet) {
                 VStack(spacing: 20) {
                     Text("Export QR Code Image")
@@ -211,6 +250,19 @@ struct SavedQRDetailView: View {
                 if let url = exportedFileURL {
                     ShareSheet(items: [url])
                 }
+            }
+            .alert(isPresented: $showingDeleteAlert) {
+                Alert(
+                    title: Text("Delete QR Code"),
+                    message: Text(
+                        "Are you sure you want to delete this QR code? This action cannot be undone."
+                    ),
+                    primaryButton: .destructive(Text("Delete")) {
+                        viewModel.deleteSavedQRCode(withID: savedCode.id)
+                        presentationMode.wrappedValue.dismiss()
+                    },
+                    secondaryButton: .cancel()
+                )
             }
         #else
             .sheet(isPresented: $showingExportSheet) {

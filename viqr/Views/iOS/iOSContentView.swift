@@ -13,39 +13,67 @@ import TikimUI
         @StateObject var viewModel = QRCodeViewModel()
         @EnvironmentObject var themeManager: ThemeManager
         @State private var selectedTab = 0
+        @State private var previousTab = 0
+        @State private var showTabBar = true
 
         var body: some View {
             ZStack(alignment: .bottom) {
                 TabView(selection: $selectedTab) {
-                    CreateTabView(viewModel: viewModel)
-                        .environmentObject(themeManager)
-                        .tag(0)
+                    NavigationView {
+                        CreateTabView(viewModel: viewModel)
+                            .environmentObject(themeManager)
+                            .onAppear { showTabBar = true }
+                            .navigationBarTitleDisplayMode(.inline)
+                    }
+                    .navigationViewStyle(StackNavigationViewStyle())
+                    .tag(0)
 
-                    SavedTabView(viewModel: viewModel)
-                        .environmentObject(themeManager)
-                        .tag(1)
+                    NavigationView {
+                        SavedTabView(viewModel: viewModel)
+                            .environmentObject(themeManager)
+                            .onDisappear { showTabBar = false }
+                            .onAppear { showTabBar = true }
+                    }
+                    .navigationViewStyle(StackNavigationViewStyle())
+                    .tag(1)
 
-                    SettingsTabView(viewModel: viewModel)
-                        .environmentObject(themeManager)
-                        .tag(2)
+                    NavigationView {
+                        SettingsTabView(viewModel: viewModel)
+                            .environmentObject(themeManager)
+                            .onAppear { showTabBar = true }
+                            .navigationBarTitleDisplayMode(.inline)
+                    }
+                    .navigationViewStyle(StackNavigationViewStyle())
+                    .tag(2)
                 }
                 .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
                 .edgesIgnoringSafeArea(.bottom)
 
-                // Custom Tab Bar
-                CustomTabBar(
-                    selectedTab: $selectedTab,
-                    items: [
-                        (icon: "qrcode", title: "Create"),
-                        (icon: "folder", title: "Saved"),
-                        (icon: "gear", title: "Settings"),
-                    ]
-                )
-                .padding(.bottom, 4)
+                // Custom Tab Bar - Only show when not in detail view
+                if showTabBar {
+                    CustomTabBar(
+                        selectedTab: $selectedTab,
+                        items: [
+                            (icon: "qrcode", title: "Create"),
+                            (icon: "folder", title: "Saved"),
+                            (icon: "gear", title: "Settings"),
+                        ]
+                    )
+                    .padding(.bottom, 4)
+                    .transition(.move(edge: .bottom))
+                    .animation(.easeInOut(duration: 0.3), value: showTabBar)
+                }
             }
             .background(Color.appBackground)
             .onAppear {
                 setupNavigationBarAppearance()
+            }
+            .onChange(of: selectedTab) { newTab in
+                // If switching to the Create tab, reset the viewModel for a new QR code
+                if newTab == 0 && previousTab != newTab {
+                    viewModel.resetForNewQRCode()
+                }
+                previousTab = newTab
             }
         }
 

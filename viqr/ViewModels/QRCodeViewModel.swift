@@ -16,6 +16,20 @@ class QRCodeViewModel: ObservableObject {
     @Published var qrStyle: QRCodeStyle = QRCodeStyle()
     @Published var savedCodes: [SavedQRCode] = []
 
+    // Flag to determine if editing an existing QR code
+    @Published var isEditingExisting = false
+
+    // Reference to currently editing QR code
+    @Published var currentEditingCode: SavedQRCode?
+
+    // Property to check if type can be changed (some types might be complex to convert)
+    var canChangeType: Bool {
+        // For now we'll allow changing type for all QR codes
+        // You could add logic here to prevent changing types for certain QR codes
+        // if there's concern about data loss when switching types
+        return true
+    }
+
     private let savedCodesKey = "SavedQRCodes"
     private var cancellables = Set<AnyCancellable>()
 
@@ -54,9 +68,37 @@ class QRCodeViewModel: ObservableObject {
         saveToDisk()
     }
 
+    // Update an existing QR code
+    func updateSavedQRCode(originalID: UUID, name: String) {
+        // Find the index of the QR code to update
+        if let index = savedCodes.firstIndex(where: { $0.id == originalID }) {
+            // Create an updated QR code
+            let updatedQRCode = SavedQRCode(
+                id: originalID,
+                name: name,
+                dateCreated: savedCodes[index].dateCreated,
+                content: qrContent,
+                style: qrStyle
+            )
+
+            // Replace the old QR code with the updated one
+            savedCodes[index] = updatedQRCode
+            saveToDisk()
+
+            // Reset the editing state
+            isEditingExisting = false
+        }
+    }
+
     // Delete a saved QR code
     func deleteSavedQRCode(at indexSet: IndexSet) {
         savedCodes.remove(atOffsets: indexSet)
+        saveToDisk()
+    }
+
+    // Delete a saved QR code by ID
+    func deleteSavedQRCode(withID id: UUID) {
+        savedCodes.removeAll { $0.id == id }
         saveToDisk()
     }
 
@@ -68,11 +110,23 @@ class QRCodeViewModel: ObservableObject {
         selectedType = savedCode.content.typeEnum
         qrContent = savedCode.content
 
+        // Set the editing flag
+        isEditingExisting = true
+
         DispatchQueue.main.async {
             self.isLoadingSavedQRCode = false
         }
 
         print("Loaded QR Code: Type=\(savedCode.content.typeEnum.rawValue)")
+    }
+
+    // Reset to create a new QR code
+    func resetForNewQRCode() {
+        isEditingExisting = false
+        currentEditingCode = nil
+        qrContent = QRCodeContent(type: .link, data: .link(url: "https://"))
+        qrStyle = QRCodeStyle()
+        selectedType = .link
     }
 
     // Export QR code as an image file
@@ -124,5 +178,16 @@ class QRCodeViewModel: ObservableObject {
         {
             savedCodes = decodedCodes
         }
+    }
+}
+
+// Extension for SavedQRCode to add a custom initializer with ID
+extension SavedQRCode {
+    init(id: UUID, name: String, dateCreated: Date, content: QRCodeContent, style: QRCodeStyle) {
+        self.id = id
+        self.name = name
+        self.dateCreated = dateCreated
+        self.content = content
+        self.style = style
     }
 }
