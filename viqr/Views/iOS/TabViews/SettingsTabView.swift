@@ -235,7 +235,6 @@ import TikimUI
         }
     }
 
-    // MARK: - Supporting Views
     struct SettingsSection<Content: View>: View {
         let title: String
         let icon: String
@@ -253,6 +252,9 @@ import TikimUI
                     Image(systemName: icon)
                         .font(.system(size: 16, weight: .semibold))
                         .foregroundColor(Color.appAccent)
+                        .padding(8)
+                        .background(Color.appAccent.opacity(0.1))
+                        .clipShape(Circle())
 
                     Text(title)
                         .font(.headline)
@@ -263,11 +265,11 @@ import TikimUI
                 content
                     .background(
                         RoundedRectangle(cornerRadius: 16)
-                            .fill(Color.appSurface1)
+                            .fill(Color.appMantle)
                     )
                     .overlay(
                         RoundedRectangle(cornerRadius: 16)
-                            .stroke(Color.appSurface2, lineWidth: 1)
+                            .stroke(Color.appAccent.opacity(0.15), lineWidth: 1)
                     )
             }
             .padding(.horizontal)
