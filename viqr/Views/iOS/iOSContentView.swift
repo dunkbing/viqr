@@ -41,7 +41,7 @@ import TikimUI
                         (icon: "gear", title: "Settings"),
                     ]
                 )
-                .padding(.bottom, 8)
+                .padding(.bottom, 4)
             }
             .background(Color.appBackground)
             .onAppear {

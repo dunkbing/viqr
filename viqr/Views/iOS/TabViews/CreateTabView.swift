@@ -55,17 +55,6 @@ import TikimUI
         var body: some View {
             ScrollView {
                 VStack(spacing: 20) {
-                    // Header
-                    HStack {
-                        Text("QR Studio")
-                            .font(.largeTitle)
-                            .fontWeight(.bold)
-                            .foregroundColor(Color.appText)
-                        Spacer()
-                    }
-                    .padding(.horizontal)
-                    .padding(.top, 10)
-
                     // Type Selection
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: 16) {
@@ -74,7 +63,7 @@ import TikimUI
                             }
                         }
                         .padding(.horizontal, 16)
-                        .padding(.vertical, 8)
+                        .padding(.top, 10)
                     }
 
                     // Preview
