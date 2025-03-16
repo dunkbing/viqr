@@ -24,10 +24,6 @@ struct TextContentView: View {
                         )
                     )
                     .frame(minHeight: 150)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 8)
-                            .stroke(Color.gray.opacity(0.2), lineWidth: 1)
-                    )
                 #else
                     TextEditor(
                         text: Binding(

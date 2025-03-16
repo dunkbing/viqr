@@ -20,8 +20,6 @@ struct VCardContentView: View {
                     let firstName, let lastName, let organization, let title, let phone, let email,
                     let address, let website, let note) = content.data
                 {
-
-                    // Personal Details Section
                     Text("Personal Details").font(.subheadline)
 
                     TextField(
@@ -76,7 +74,9 @@ struct VCardContentView: View {
                         )
                     )
                     .textFieldStyle(RoundedBorderTextFieldStyle())
-                    //                    .keyboardType(.phonePad)
+                    #if os(iOS)
+                        .keyboardType(.phonePad)
+                    #endif
 
                     TextField(
                         "Email",
@@ -86,7 +86,9 @@ struct VCardContentView: View {
                         )
                     )
                     .textFieldStyle(RoundedBorderTextFieldStyle())
-                    //                    .keyboardType(.emailAddress)
+                    #if os(iOS)
+                        .keyboardType(.emailAddress)
+                    #endif
 
                     TextField(
                         "Address",
@@ -105,7 +107,9 @@ struct VCardContentView: View {
                         )
                     )
                     .textFieldStyle(RoundedBorderTextFieldStyle())
-                    //                    .keyboardType(.URL)
+                    #if os(iOS)
+                        .keyboardType(.URL)
+                    #endif
 
                     // Additional Information Section
                     Text("Additional Information").font(.subheadline)
@@ -119,10 +123,7 @@ struct VCardContentView: View {
                             )
                         )
                         .frame(minHeight: 100)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 8)
-                                .stroke(Color.gray.opacity(0.2), lineWidth: 1)
-                        )
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
                     #else
                         TextEditor(
                             text: Binding<String>(

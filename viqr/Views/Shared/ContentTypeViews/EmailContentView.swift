@@ -58,10 +58,6 @@ struct EmailContentView: View {
                             )
                         )
                         .frame(minHeight: 100)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 8)
-                                .stroke(Color.gray.opacity(0.2), lineWidth: 1)
-                        )
                     #else
                         TextEditor(
                             text: Binding(

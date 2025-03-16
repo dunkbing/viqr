@@ -22,20 +22,22 @@ import TikimUI
             Button(action: {
                 selectedType = type
             }) {
-                VStack {
+                HStack(spacing: 8) {
                     Image(systemName: type.icon)
-                        .font(.system(size: 24))
-                        .foregroundColor(selectedType == type ? .white : Color.appAccent)
-                        .frame(width: 50, height: 50)
-                        .background(
-                            selectedType == type ? Color.appAccent : Color.appAccent.opacity(0.1)
-                        )
-                        .cornerRadius(15)
+                        .font(.system(size: 18))
+                        .frame(width: 25, height: 25)
 
                     Text(type.rawValue)
-                        .font(.system(size: 12, weight: .medium))
-                        .foregroundColor(selectedType == type ? Color.appAccent : Color.appText)
+                        .font(.system(size: 14, weight: .medium))
                 }
+                .padding(.vertical, 8)
+                .padding(.horizontal, 12)
+                .foregroundColor(selectedType == type ? .white : Color.appAccent)
+                .background(
+                    selectedType == type
+                        ? Color.appSecondaryAccent : Color.appSecondaryAccent.opacity(0.1)
+                )
+                .cornerRadius(8)
             }
             .buttonStyle(BouncyButtonStyle())
         }
@@ -55,17 +57,6 @@ import TikimUI
         var body: some View {
             ScrollView {
                 VStack(spacing: 20) {
-                    // Type Selection
-                    ScrollView(.horizontal, showsIndicators: false) {
-                        HStack(spacing: 16) {
-                            ForEach(QRCodeType.allCases) { type in
-                                TypeButton(type: type, selectedType: $viewModel.selectedType)
-                            }
-                        }
-                        .padding(.horizontal, 16)
-                        .padding(.top, 10)
-                    }
-
                     // Preview
                     QRCodePreviewView(viewModel: viewModel)
                         .frame(height: 250)
@@ -76,6 +67,7 @@ import TikimUI
                                 .shadow(color: Color.black.opacity(0.05), radius: 10, x: 0, y: 5)
                         )
                         .padding(.horizontal)
+                        .padding(.top)
 
                     // Action Buttons
                     HStack(spacing: 15) {
@@ -95,23 +87,25 @@ import TikimUI
                     }
                     .padding(.horizontal)
 
-                    // Content/Style Tabs
-                    VStack {
-                        HStack {
-                            TabButton(
-                                title: "Content", systemImage: "doc.text",
-                                isSelected: selectedTab == 0
-                            ) {
-                                selectedTab = 0
-                            }
-
-                            TabButton(
-                                title: "Style", systemImage: "paintbrush",
-                                isSelected: selectedTab == 1
-                            ) {
-                                selectedTab = 1
+                    // Type Selection
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: 16) {
+                            ForEach(QRCodeType.allCases) { type in
+                                TypeButton(type: type, selectedType: $viewModel.selectedType)
                             }
                         }
+                        .padding(.horizontal, 16)
+                    }
+
+                    // Content/Style Tabs
+                    VStack {
+                        TabPickerView(
+                            selection: $selectedTab,
+                            options: [
+                                (value: 0, title: "Content"),
+                                (value: 1, title: "Style"),
+                            ]
+                        )
                         .padding(.horizontal)
                         .padding(.top)
 
@@ -128,7 +122,7 @@ import TikimUI
                             .fill(Color.appSurface.opacity(0.5))
                     )
                     .padding(.horizontal)
-                    .padding(.bottom, 100)  // Extra padding for the tab bar
+                    .padding(.bottom, 100)
                 }
             }
             .background(Color.appBackground.ignoresSafeArea())
@@ -277,7 +271,6 @@ import TikimUI
                 .background(color)
                 .foregroundColor(.white)
                 .cornerRadius(16)
-                .shadow(color: color.opacity(0.3), radius: 5, x: 0, y: 3)
             }
             .buttonStyle(BouncyButtonStyle())
         }

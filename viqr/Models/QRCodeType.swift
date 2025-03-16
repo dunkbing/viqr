@@ -10,12 +10,12 @@ import SwiftUI
 
 enum QRCodeType: String, CaseIterable, Identifiable {
     case link = "Link"
-    case text = "Text"
     case email = "E-mail"
     case phone = "Phone"
     case whatsapp = "Whatsapp"
     case wifi = "Wifi"
     case vCard = "V-Card"
+    case text = "Text"
 
     var id: String { rawValue }
 
