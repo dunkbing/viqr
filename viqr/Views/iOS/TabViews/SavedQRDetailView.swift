@@ -166,14 +166,18 @@ struct SavedQRDetailView: View {
         .onAppear {
             // Hide the tab bar when this view appears
             NotificationCenter.default.post(
-                name: NSNotification.Name("TabBarVisibility"), object: nil,
-                userInfo: ["isVisible": false])
+                name: NSNotification.Name("TabBarVisibility"),
+                object: nil,
+                userInfo: ["isVisible": false]
+            )
         }
         .onDisappear {
             // Show the tab bar when this view disappears
             NotificationCenter.default.post(
-                name: NSNotification.Name("TabBarVisibility"), object: nil,
-                userInfo: ["isVisible": true])
+                name: NSNotification.Name("TabBarVisibility"),
+                object: nil,
+                userInfo: ["isVisible": true]
+            )
         }
         #if os(iOS)
             .sheet(isPresented: $showingEditSheet) {

@@ -67,6 +67,7 @@ import TikimUI
             .background(Color.appBackground)
             .onAppear {
                 setupNavigationBarAppearance()
+                setupTabBarVisibilityNotification()
             }
             .onChange(of: selectedTab) { newTab in
                 // If switching to the Create tab, reset the viewModel for a new QR code
@@ -88,6 +89,22 @@ import TikimUI
             UINavigationBar.appearance().compactAppearance = appearance
             UINavigationBar.appearance().scrollEdgeAppearance = appearance
             UINavigationBar.appearance().tintColor = UIColor(Color.appAccent)
+        }
+
+        private func setupTabBarVisibilityNotification() {
+            NotificationCenter.default.addObserver(
+                forName: NSNotification.Name("TabBarVisibility"),
+                object: nil,
+                queue: .main
+            ) { notification in
+                if let userInfo = notification.userInfo as? [String: Bool],
+                    let isVisible = userInfo["isVisible"]
+                {
+                    withAnimation {
+                        showTabBar = isVisible
+                    }
+                }
+            }
         }
     }
 #endif

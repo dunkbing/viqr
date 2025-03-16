@@ -91,18 +91,6 @@ struct SavedTabView: View {
                                             viewModel: viewModel,
                                             savedCode: qrCode
                                         )
-                                        .onAppear {
-                                            NotificationCenter.default.post(
-                                                name: NSNotification.Name("HideTabBar"),
-                                                object: nil
-                                            )
-                                        }
-                                        .onDisappear {
-                                            NotificationCenter.default.post(
-                                                name: NSNotification.Name("ShowTabBar"),
-                                                object: nil
-                                            )
-                                        }
                                     ) {
                                         SavedCodeRow(qrCode: qrCode)
                                     }
@@ -124,8 +112,9 @@ struct SavedTabView: View {
                                                 viewModel.loadSavedQRCode(qrCode)
                                                 viewModel.currentEditingCode = qrCode
                                                 NotificationCenter.default.post(
-                                                    name: NSNotification.Name("HideTabBar"),
-                                                    object: nil
+                                                    name: NSNotification.Name("TabBarVisibility"),
+                                                    object: nil,
+                                                    userInfo: ["isVisible": false]
                                                 )
                                                 isEditPresented = true
                                             } label: {
@@ -162,28 +151,6 @@ struct SavedTabView: View {
                     .navigationBarTitleDisplayMode(.inline)
                 }
                 .accentColor(Color.appAccent)
-            }
-            .onAppear {
-                // Setup notification observers
-                NotificationCenter.default.addObserver(
-                    forName: NSNotification.Name("HideTabBar"), object: nil, queue: .main
-                ) { _ in
-                    NotificationCenter.default.post(
-                        name: NSNotification.Name("TabBarVisibility"),
-                        object: nil,
-                        userInfo: ["isVisible": false]
-                    )
-                }
-
-                NotificationCenter.default.addObserver(
-                    forName: NSNotification.Name("ShowTabBar"), object: nil, queue: .main
-                ) { _ in
-                    NotificationCenter.default.post(
-                        name: NSNotification.Name("TabBarVisibility"),
-                        object: nil,
-                        userInfo: ["isVisible": true]
-                    )
-                }
             }
             .alert(isPresented: $showingDeleteAlert) {
                 Alert(
