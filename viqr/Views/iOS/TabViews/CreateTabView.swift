@@ -55,7 +55,7 @@ import TikimUI
         @State private var selectedTab = 0
 
         var body: some View {
-            ScrollView {
+            KeyboardAwareScrollView {
                 VStack(spacing: 20) {
                     // Preview
                     QRCodePreviewView(viewModel: viewModel)
@@ -122,8 +122,8 @@ import TikimUI
                             .fill(Color.appSurface.opacity(0.5))
                     )
                     .padding(.horizontal)
-                    .padding(.bottom, 100)
-                    .keyboardAware()
+
+                    Spacer(minLength: 50)
                 }
             }
             .background(Color.appBackground.ignoresSafeArea())
@@ -168,18 +168,16 @@ import TikimUI
                     // Preview
                     let qrDocument = viewModel.generateQRCode()
 
-                    #if canImport(UIKit)
-                        if let uiImage = try? qrDocument.uiImage(CGSize(width: 150, height: 150)) {
-                            Image(uiImage: uiImage)
-                                .resizable()
-                                .interpolation(.none)
-                                .scaledToFit()
-                                .frame(width: 150, height: 150)
-                                .background(Color.white)
-                                .cornerRadius(10)
-                                .shadow(radius: 2)
-                        }
-                    #endif
+                    if let uiImage = try? qrDocument.uiImage(CGSize(width: 150, height: 150)) {
+                        Image(uiImage: uiImage)
+                            .resizable()
+                            .interpolation(.none)
+                            .scaledToFit()
+                            .frame(width: 150, height: 150)
+                            .background(Color.white)
+                            .cornerRadius(10)
+                            .shadow(radius: 2)
+                    }
 
                     // Filename field
                     TextField("Filename", text: $exportFileName)
@@ -223,6 +221,7 @@ import TikimUI
                     ShareSheet(items: [url])
                 }
             }
+            .background(Color.appBackground.ignoresSafeArea())
         }
     }
 

@@ -31,7 +31,8 @@ struct iOSEditorView: View {
                 }
             }
             .animation(.default, value: viewModel.selectedType)
-            .padding()
+            .padding(.horizontal)
+            .padding(.bottom)
         }
     }
 }

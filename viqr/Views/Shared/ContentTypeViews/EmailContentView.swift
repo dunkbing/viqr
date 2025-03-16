@@ -60,6 +60,9 @@ struct EmailContentView: View {
                             )
                         )
                         .frame(minHeight: 100)
+                        .padding(4)
+                        .background(Color.appSurface)
+                        .cornerRadius(8)
                     #else
                         TextEditor(
                             text: Binding(
