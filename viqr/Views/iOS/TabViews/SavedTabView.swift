@@ -26,6 +26,10 @@ struct SavedTabView: View {
     @State private var isEditPresented = false
     @State private var hasAppeared = false
 
+    // New state variables for the bottom sheet
+    @State private var selectedQRCode: SavedQRCode? = nil
+    @State private var showingDetailSheet = false
+
     var body: some View {
         NavigationView {
             ZStack {
@@ -52,7 +56,9 @@ struct SavedTabView: View {
                             isEditMode: $isEditMode,
                             itemToDelete: $itemToDelete,
                             showingDeleteAlert: $showingDeleteAlert,
-                            isEditPresented: $isEditPresented
+                            isEditPresented: $isEditPresented,
+                            selectedQRCode: $selectedQRCode,
+                            showingDetailSheet: $showingDetailSheet
                         )
                     }
                 }
@@ -68,6 +74,31 @@ struct SavedTabView: View {
                         )
                     }
                     .accentColor(Color.appAccent)
+                }
+                // Bottom sheet for QR code details
+                .sheet(
+                    isPresented: $showingDetailSheet,
+                    onDismiss: {
+                        selectedQRCode = nil
+                    }
+                ) {
+                    if let selectedCode = selectedQRCode {
+                        if #available(iOS 16.0, *) {
+                            SavedQRDetailView(
+                                viewModel: viewModel,
+                                savedCode: selectedCode,
+                                isSheetPresented: $showingDetailSheet
+                            )
+                            .presentationDetents([.medium, .large])
+                            .presentationDragIndicator(.visible)
+                        } else {
+                            SavedQRDetailView(
+                                viewModel: viewModel,
+                                savedCode: selectedCode,
+                                isSheetPresented: $showingDetailSheet
+                            )
+                        }
+                    }
                 }
                 .alert(isPresented: $showingDeleteAlert) {
                     Alert(
@@ -179,19 +210,20 @@ struct SavedQRCodeList: View {
     @Binding var itemToDelete: IndexSet?
     @Binding var showingDeleteAlert: Bool
     @Binding var isEditPresented: Bool
-    @State private var selectedQRCode: SavedQRCode? = nil
+    @Binding var selectedQRCode: SavedQRCode?
+    @Binding var showingDetailSheet: Bool
+    @State private var pressedQRCode: SavedQRCode? = nil
 
     var body: some View {
         ScrollView {
             LazyVStack(spacing: 16) {
                 ForEach(Array(filteredCodes.enumerated()), id: \.element.id) { index, qrCode in
-                    NavigationLink(
-                        destination: SavedQRDetailView(
-                            viewModel: viewModel,
-                            savedCode: qrCode
-                        )
-                    ) {
-                        SavedCodeRow(qrCode: qrCode)
+                    // Changed from NavigationLink to Button to trigger the bottom sheet
+                    Button(action: {
+                        selectedQRCode = qrCode
+                        showingDetailSheet = true
+                    }) {
+                        SavedCodeRow(qrCode: qrCode, isPressed: pressedQRCode?.id == qrCode.id)
                             .offset(x: isEditMode.isEditing ? 20 : 0)
                             .animation(
                                 .spring(response: 0.4, dampingFraction: 0.8),
@@ -238,6 +270,15 @@ struct SavedQRCodeList: View {
                             Label("Delete", systemImage: "trash")
                         }
                     }
+                    .simultaneousGesture(
+                        DragGesture(minimumDistance: 0)
+                            .onChanged { _ in
+                                pressedQRCode = qrCode
+                            }
+                            .onEnded { _ in
+                                pressedQRCode = nil
+                            }
+                    )
                     #if os(iOS)
                         .swipeActions(edge: .trailing) {
                             Button(role: .destructive) {
@@ -270,7 +311,7 @@ struct SavedQRCodeList: View {
 // Enhanced QR code row
 struct SavedCodeRow: View {
     let qrCode: SavedQRCode
-    @State private var isPressed = false
+    var isPressed: Bool = false
 
     var body: some View {
         HStack(spacing: 16) {

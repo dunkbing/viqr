@@ -133,7 +133,8 @@ import TikimUI
                     if !isEditMode {
                         HStack(spacing: 15) {
                             ActionButton(
-                                title: "Save", systemImage: "square.and.arrow.down",
+                                title: "Save",
+                                systemImage: "square.and.arrow.down",
                                 color: Color.appGreen
                             ) {
                                 showingSaveSheet = true
