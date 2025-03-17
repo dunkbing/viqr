@@ -405,23 +405,3 @@ struct SavedCodeRow: View {
         }
     }
 }
-
-struct DetailRow: View {
-    let label: String
-    let value: String
-
-    var body: some View {
-        HStack(alignment: .top) {
-            Text(label + ":")
-                .fontWeight(.medium)
-                .frame(width: 80, alignment: .leading)
-                .foregroundColor(Color.appText)
-
-            Text(value)
-                .foregroundColor(Color.appSubtitle)
-
-            Spacer()
-        }
-        .padding(.vertical, 4)
-    }
-}

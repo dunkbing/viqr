@@ -67,43 +67,6 @@ struct SavedQRDetailView: View {
                         .padding()
                 #endif
 
-                // QR Code Details
-                GroupBox(label: Label("Details", systemImage: "info.circle")) {
-                    VStack(alignment: .leading, spacing: 8) {
-                        DetailRow(label: "Type", value: savedCode.content.typeEnum.rawValue)
-                        DetailRow(label: "Created", value: formattedDate(savedCode.dateCreated))
-
-                        // Show content-specific details
-                        switch savedCode.content.data {
-                        case .link(let url):
-                            DetailRow(label: "URL", value: url)
-                        case .text(let content):
-                            DetailRow(
-                                label: "Text",
-                                value: content.prefix(50) + (content.count > 50 ? "..." : ""))
-                        case .phone(let number):
-                            DetailRow(label: "Phone", value: number)
-                        case .email(let address, let subject, _):
-                            DetailRow(label: "Email", value: address)
-                            if !subject.isEmpty {
-                                DetailRow(label: "Subject", value: subject)
-                            }
-                        case .wifi(let ssid, _, _, let security):
-                            DetailRow(label: "Network", value: ssid)
-                            DetailRow(label: "Security", value: security.description)
-                        case .whatsapp(let number, _):
-                            DetailRow(label: "Number", value: number)
-                        case .vCard(let firstName, let lastName, let organization, _, _, _, _, _, _):
-                            DetailRow(label: "Name", value: "\(firstName) \(lastName)")
-                            if !organization.isEmpty {
-                                DetailRow(label: "Organization", value: organization)
-                            }
-                        }
-                    }
-                    .padding()
-                }
-                .padding(.horizontal)
-
                 // Action Buttons
                 VStack(spacing: 15) {
                     Button(action: {
