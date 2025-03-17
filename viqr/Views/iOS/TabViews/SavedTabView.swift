@@ -24,157 +24,85 @@ struct SavedTabView: View {
     @State private var searchText = ""
     @State private var isEditMode: EditMode = .inactive
     @State private var isEditPresented = false
+    @State private var hasAppeared = false
 
     var body: some View {
         NavigationView {
-            VStack(spacing: 0) {
-                // Search bar
-                SearchBar(text: $searchText, placeholder: "Search saved QR codes")
-                    .padding(.horizontal)
-                    .padding(.vertical, 8)
-                    .background(Color.appSurface1)
+            ZStack {
+                // Background
+                Color.appBackground.ignoresSafeArea()
 
-                ScrollView {
-                    VStack(spacing: 16) {
-                        // Header
-                        HStack {
-                            Text("Saved QR Codes")
-                                .font(.largeTitle)
-                                .fontWeight(.bold)
-                                .foregroundColor(Color.appText)
-                            Spacer()
+                VStack(spacing: 0) {
+                    // Search header
+                    SearchHeaderView(
+                        searchText: $searchText,
+                        title: "Saved QR Codes",
+                        placeholderText: "Search your QR codes...",
+                        isEditMode: $isEditMode
+                    )
+                    .padding(.bottom, 16)
 
-                            #if os(iOS)
-                                CustomEditButton(editMode: $isEditMode)
-                            #else
-                                EditButton()
-                                    .foregroundColor(Color.appAccent)
-                            #endif
-                        }
-                        .padding(.horizontal)
-                        .padding(.top, 10)
-
-                        if viewModel.savedCodes.isEmpty {
-                            VStack(spacing: 20) {
-                                Image(systemName: "tray")
-                                    .font(.system(size: 60))
-                                    .foregroundColor(Color.appSubtitle)
-                                    .padding()
-
-                                Text("No Saved QR Codes")
-                                    .font(.title2)
-                                    .foregroundColor(Color.appText)
-
-                                Text("Create and save QR codes in the Create tab")
-                                    .foregroundColor(Color.appSubtitle)
-                                    .multilineTextAlignment(.center)
-                                    .padding()
-
-                                Image(systemName: "arrow.down")
-                                    .font(.system(size: 24))
-                                    .foregroundColor(Color.appSubtitle)
-                                    .padding()
-                            }
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 40)
-                            .background(
-                                RoundedRectangle(cornerRadius: 20)
-                                    .fill(Color.appSurface1.opacity(0.5))
-                            )
-                            .padding(.horizontal)
-                        } else {
-                            // Saved QR codes list
-                            LazyVStack(spacing: 12) {
-                                ForEach(filteredCodes) { qrCode in
-                                    NavigationLink(
-                                        destination: SavedQRDetailView(
-                                            viewModel: viewModel,
-                                            savedCode: qrCode
-                                        )
-                                    ) {
-                                        SavedCodeRow(qrCode: qrCode)
-                                    }
-                                    .buttonStyle(PlainButtonStyle())
-                                    #if os(iOS)
-                                        .swipeActions(edge: .trailing) {
-                                            Button(role: .destructive) {
-                                                itemToDelete = IndexSet([
-                                                    filteredCodes.firstIndex(where: {
-                                                        $0.id == qrCode.id
-                                                    })!
-                                                ])
-                                                showingDeleteAlert = true
-                                            } label: {
-                                                Label("Delete", systemImage: "trash")
-                                            }
-
-                                            Button {
-                                                viewModel.loadSavedQRCode(qrCode)
-                                                viewModel.currentEditingCode = qrCode
-                                                NotificationCenter.default.post(
-                                                    name: NSNotification.Name("TabBarVisibility"),
-                                                    object: nil,
-                                                    userInfo: ["isVisible": false]
-                                                )
-                                                isEditPresented = true
-                                            } label: {
-                                                Label("Edit", systemImage: "pencil")
-                                            }
-                                            .tint(.blue)
-                                        }
-                                    #endif
-                                }
-                                .onDelete { indexSet in
-                                    if isEditMode.isEditing {
-                                        itemToDelete = indexSet
-                                        showingDeleteAlert = true
-                                    }
-                                }
-                            }
-                            .padding(.horizontal)
-                        }
-
-                        // Spacer for tab bar
-                        Spacer(minLength: 100)
+                    // Empty state or list content
+                    if viewModel.savedCodes.isEmpty {
+                        EmptyStateView()
+                    } else {
+                        SavedQRCodeList(
+                            viewModel: viewModel,
+                            filteredCodes: filteredCodes,
+                            isEditMode: $isEditMode,
+                            itemToDelete: $itemToDelete,
+                            showingDeleteAlert: $showingDeleteAlert,
+                            isEditPresented: $isEditPresented
+                        )
                     }
                 }
-                .background(Color.appBackground.ignoresSafeArea())
-            }
-            .environment(\.editMode, $isEditMode)
-            .sheet(isPresented: $isEditPresented) {
-                // Use a NavigationView to have a proper toolbar in the sheet
-                NavigationView {
-                    QRCodeEditView(
-                        viewModel: viewModel, originalCode: viewModel.currentEditingCode!,
-                        isPresented: $isEditPresented
-                    )
-                    .navigationBarTitleDisplayMode(.inline)
+                .animation(.easeInOut(duration: 0.3), value: searchText)
+                .environment(\.editMode, $isEditMode)
+                .sheet(isPresented: $isEditPresented) {
+                    // Use a NavigationView to have a proper toolbar in the sheet
+                    NavigationView {
+                        QRCodeEditView(
+                            viewModel: viewModel,
+                            originalCode: viewModel.currentEditingCode!,
+                            isPresented: $isEditPresented
+                        )
+                    }
+                    .accentColor(Color.appAccent)
                 }
-                .accentColor(Color.appAccent)
-            }
-            .alert(isPresented: $showingDeleteAlert) {
-                Alert(
-                    title: Text("Delete QR Code"),
-                    message: Text(
-                        "Are you sure you want to delete this QR code? This action cannot be undone."
-                    ),
-                    primaryButton: .destructive(Text("Delete")) {
-                        if let indexSet = itemToDelete {
-                            // Convert indexSet from filtered to model indexes
-                            let toDelete = indexSet.map { filteredCodes[$0] }
-                            for code in toDelete {
-                                viewModel.deleteSavedQRCode(withID: code.id)
+                .alert(isPresented: $showingDeleteAlert) {
+                    Alert(
+                        title: Text("Delete QR Code"),
+                        message: Text(
+                            "Are you sure you want to delete this QR code? This action cannot be undone."
+                        ),
+                        primaryButton: .destructive(Text("Delete")) {
+                            if let indexSet = itemToDelete {
+                                // Convert indexSet from filtered to model indexes
+                                let toDelete = indexSet.map { filteredCodes[$0] }
+                                for code in toDelete {
+                                    viewModel.deleteSavedQRCode(withID: code.id)
+                                }
+                                itemToDelete = nil
                             }
+                        },
+                        secondaryButton: .cancel {
                             itemToDelete = nil
                         }
-                    },
-                    secondaryButton: .cancel {
-                        itemToDelete = nil
-                    }
-                )
+                    )
+                }
             }
             .navigationTitle("")  // Hide the default navigation title
             .navigationBarHidden(true)  // Hide the navigation bar
+            .onAppear {
+                // Apply animation only after first appearance
+                if !hasAppeared {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                        withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
+                            hasAppeared = true
+                        }
+                    }
+                }
+            }
         }
         .navigationViewStyle(StackNavigationViewStyle())
     }
@@ -193,38 +121,156 @@ struct SavedTabView: View {
     }
 }
 
-// Search bar component
-struct SearchBar: View {
-    @Binding var text: String
-    var placeholder: String
+// Empty state component
+struct EmptyStateView: View {
+    @State private var appear = false
 
     var body: some View {
-        HStack {
-            Image(systemName: "magnifyingglass")
-                .foregroundColor(text.isEmpty ? Color.appSubtitle : Color.appAccent)
-                .padding(.leading, 8)
+        VStack(spacing: 24) {
+            Image(systemName: "qrcode.viewfinder")
+                .font(.system(size: 70))
+                .foregroundColor(Color.appAccent.opacity(0.7))
+                .padding()
+                .background(
+                    Circle()
+                        .fill(Color.appAccent.opacity(0.1))
+                        .frame(width: 150, height: 150)
+                )
+                .scaleEffect(appear ? 1.0 : 0.8)
+                .opacity(appear ? 1.0 : 0)
 
-            TextField(placeholder, text: $text)
+            Text("No Saved QR Codes")
+                .font(.title2)
+                .fontWeight(.bold)
                 .foregroundColor(Color.appText)
-                .padding(10)
+                .opacity(appear ? 1.0 : 0)
 
-            if !text.isEmpty {
-                Button(action: {
-                    text = ""
-                }) {
-                    Image(systemName: "xmark.circle.fill")
-                        .foregroundColor(Color.appSubtitle)
-                        .padding(.trailing, 8)
-                }
+            Text("Create and save QR codes in the Create tab")
+                .foregroundColor(Color.appSubtitle)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, 40)
+                .opacity(appear ? 1.0 : 0)
+
+            Image(systemName: "arrow.down.circle.fill")
+                .font(.system(size: 28))
+                .foregroundColor(Color.appAccent)
+                .opacity(appear ? 1.0 : 0)
+                .offset(y: appear ? 0 : -10)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(
+            RoundedRectangle(cornerRadius: 20)
+                .fill(Color.appSurface1.opacity(0.5))
+                .padding(.horizontal)
+        )
+        .onAppear {
+            withAnimation(.spring(response: 0.6, dampingFraction: 0.7).delay(0.1)) {
+                appear = true
             }
         }
-        .background(Color.appSurface2.opacity(0.5))
-        .cornerRadius(12)
     }
 }
 
+// List of saved QR codes
+struct SavedQRCodeList: View {
+    @ObservedObject var viewModel: QRCodeViewModel
+    let filteredCodes: [SavedQRCode]
+    @Binding var isEditMode: EditMode
+    @Binding var itemToDelete: IndexSet?
+    @Binding var showingDeleteAlert: Bool
+    @Binding var isEditPresented: Bool
+    @State private var selectedQRCode: SavedQRCode? = nil
+
+    var body: some View {
+        ScrollView {
+            LazyVStack(spacing: 16) {
+                ForEach(Array(filteredCodes.enumerated()), id: \.element.id) { index, qrCode in
+                    NavigationLink(
+                        destination: SavedQRDetailView(
+                            viewModel: viewModel,
+                            savedCode: qrCode
+                        )
+                    ) {
+                        SavedCodeRow(qrCode: qrCode)
+                            .offset(x: isEditMode.isEditing ? 20 : 0)
+                            .animation(
+                                .spring(response: 0.4, dampingFraction: 0.8),
+                                value: isEditMode.isEditing
+                            )
+                            .overlay(
+                                isEditMode.isEditing
+                                    ? HStack {
+                                        Button(action: {
+                                            itemToDelete = IndexSet([index])
+                                            showingDeleteAlert = true
+                                        }) {
+                                            Image(systemName: "trash.circle.fill")
+                                                .font(.system(size: 28))
+                                                .foregroundColor(Color.appRed)
+                                                .background(Circle().fill(Color.white))
+                                        }
+                                        .offset(x: -15)
+
+                                        Spacer()
+                                    }
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                    : nil
+                            )
+                    }
+                    .buttonStyle(PlainButtonStyle())
+                    .contextMenu {
+                        // Context menu options (long press)
+                        Button(action: {
+                            viewModel.loadSavedQRCode(qrCode)
+                            viewModel.currentEditingCode = qrCode
+                            isEditPresented = true
+                        }) {
+                            Label("Edit", systemImage: "pencil")
+                        }
+
+                        Button(
+                            role: .destructive,
+                            action: {
+                                itemToDelete = IndexSet([index])
+                                showingDeleteAlert = true
+                            }
+                        ) {
+                            Label("Delete", systemImage: "trash")
+                        }
+                    }
+                    #if os(iOS)
+                        .swipeActions(edge: .trailing) {
+                            Button(role: .destructive) {
+                                itemToDelete = IndexSet([index])
+                                showingDeleteAlert = true
+                            } label: {
+                                Label("Delete", systemImage: "trash")
+                            }
+
+                            Button {
+                                viewModel.loadSavedQRCode(qrCode)
+                                viewModel.currentEditingCode = qrCode
+                                isEditPresented = true
+                            } label: {
+                                Label("Edit", systemImage: "pencil")
+                            }
+                            .tint(.blue)
+                        }
+                    #endif
+                }
+
+                // Extra space at bottom for tab bar
+                Spacer(minLength: 100)
+            }
+            .padding(.horizontal)
+        }
+    }
+}
+
+// Enhanced QR code row
 struct SavedCodeRow: View {
     let qrCode: SavedQRCode
+    @State private var isPressed = false
 
     var body: some View {
         HStack(spacing: 16) {
@@ -242,8 +288,13 @@ struct SavedCodeRow: View {
                             .interpolation(.none)
                             .resizable()
                             .frame(width: 60, height: 60)
+                            .clipShape(RoundedRectangle(cornerRadius: 12))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 12)
+                                    .stroke(Color.white, lineWidth: 1)
+                            )
                             .background(Color.white)
-                            .cornerRadius(12)
+                            .clipShape(RoundedRectangle(cornerRadius: 12))
                             .shadow(
                                 color: Color.black.opacity(0.1), radius: 2,
                                 x: 0, y: 1)
@@ -251,10 +302,12 @@ struct SavedCodeRow: View {
                         // Fallback if QR code generation fails
                         Image(systemName: "qrcode")
                             .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .padding(10)
                             .frame(width: 60, height: 60)
                             .foregroundColor(Color.appAccent)
                             .background(Color.white)
-                            .cornerRadius(12)
+                            .clipShape(RoundedRectangle(cornerRadius: 12))
                     }
                 }
             #else
@@ -267,34 +320,63 @@ struct SavedCodeRow: View {
                     .cornerRadius(12)
             #endif
 
-            VStack(alignment: .leading, spacing: 4) {
-                Text(qrCode.name)
-                    .font(.headline)
-                    .foregroundColor(Color.appText)
+            VStack(alignment: .leading, spacing: 6) {
+                HStack {
+                    Text(qrCode.name)
+                        .font(.headline)
+                        .fontWeight(.semibold)
+                        .foregroundColor(Color.appText)
 
-                Text(qrCode.content.typeEnum.rawValue)
-                    .font(.subheadline)
-                    .foregroundColor(Color.appSubtitle)
+                    Spacer()
 
-                Text(formattedDate(qrCode.dateCreated))
-                    .font(.caption)
-                    .foregroundColor(Color.appSubtitle)
+                    Text(formattedDate(qrCode.dateCreated))
+                        .font(.caption)
+                        .foregroundColor(Color.appSubtitle)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 3)
+                        .background(Color.appSurface2.opacity(0.3))
+                        .cornerRadius(6)
+                }
+
+                HStack(spacing: 8) {
+                    HStack(spacing: 4) {
+                        Image(systemName: qrCode.content.typeEnum.icon)
+                            .font(.system(size: 12))
+                        Text(qrCode.content.typeEnum.rawValue)
+                            .font(.system(size: 13, weight: .medium))
+                    }
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 3)
+                    .background(Color.appAccent.opacity(0.2))
+                    .foregroundColor(Color.appAccent)
+                    .cornerRadius(6)
+
+                    Text(contentPreview(for: qrCode.content))
+                        .font(.subheadline)
+                        .foregroundColor(Color.appSubtitle)
+                        .lineLimit(1)
+                }
             }
 
             Spacer()
 
             Image(systemName: "chevron.right")
-                .foregroundColor(Color.appSubtitle)
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundColor(Color.appSubtitle.opacity(0.6))
+                .padding(8)
+                .background(Color.appSurface2.opacity(0.3))
+                .clipShape(Circle())
         }
         .padding(16)
         .background(
             RoundedRectangle(cornerRadius: 16)
                 .fill(Color.appSurface1)
+                .shadow(
+                    color: Color.black.opacity(isPressed ? 0.01 : 0.07), radius: isPressed ? 4 : 8,
+                    x: 0, y: isPressed ? 1 : 3)
         )
-        .overlay(
-            RoundedRectangle(cornerRadius: 16)
-                .stroke(Color.appSurface2, lineWidth: 1)
-        )
+        .scaleEffect(isPressed ? 0.98 : 1.0)
+        .animation(.spring(response: 0.3, dampingFraction: 0.7), value: isPressed)
     }
 
     private func formattedDate(_ date: Date) -> String {
@@ -302,6 +384,25 @@ struct SavedCodeRow: View {
         formatter.dateStyle = .medium
         formatter.timeStyle = .none
         return formatter.string(from: date)
+    }
+
+    private func contentPreview(for content: QRCodeContent) -> String {
+        switch content.data {
+        case .link(let url):
+            return url
+        case .text(let content):
+            return content.prefix(25) + (content.count > 25 ? "..." : "")
+        case .phone(let number):
+            return number
+        case .email(let address, _, _):
+            return address
+        case .wifi(let ssid, _, _, _):
+            return "Network: \(ssid)"
+        case .whatsapp(let number, _):
+            return number
+        case .vCard(let firstName, let lastName, _, _, _, _, _, _, _):
+            return "\(firstName) \(lastName)"
+        }
     }
 }
 
