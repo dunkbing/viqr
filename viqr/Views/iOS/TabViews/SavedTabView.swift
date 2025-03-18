@@ -28,7 +28,6 @@ struct SavedTabView: View {
 
     // New state variables for the bottom sheet
     @State private var selectedQRCode: SavedQRCode? = nil
-    @State private var showingDetailSheet = false
 
     var body: some View {
         NavigationView {
@@ -57,8 +56,7 @@ struct SavedTabView: View {
                             itemToDelete: $itemToDelete,
                             showingDeleteAlert: $showingDeleteAlert,
                             isEditPresented: $isEditPresented,
-                            selectedQRCode: $selectedQRCode,
-                            showingDetailSheet: $showingDetailSheet
+                            selectedQRCode: $selectedQRCode
                         )
                     }
                 }
@@ -75,29 +73,19 @@ struct SavedTabView: View {
                     }
                     .accentColor(Color.appAccent)
                 }
-                // Bottom sheet for QR code details
-                .sheet(
-                    isPresented: $showingDetailSheet,
-                    onDismiss: {
-                        selectedQRCode = nil
-                    }
-                ) {
-                    if let selectedCode = selectedQRCode {
-                        if #available(iOS 16.0, *) {
-                            SavedQRDetailView(
-                                viewModel: viewModel,
-                                savedCode: selectedCode,
-                                isSheetPresented: $showingDetailSheet
-                            )
-                            .presentationDetents([.medium, .large])
-                            .presentationDragIndicator(.visible)
-                        } else {
-                            SavedQRDetailView(
-                                viewModel: viewModel,
-                                savedCode: selectedCode,
-                                isSheetPresented: $showingDetailSheet
-                            )
-                        }
+                .sheet(item: $selectedQRCode) { selectedCode in
+                    if #available(iOS 16.0, *) {
+                        SavedQRDetailView(
+                            viewModel: viewModel,
+                            savedCode: selectedCode
+                        )
+                        .presentationDetents([.medium, .large])
+                        .presentationDragIndicator(.visible)
+                    } else {
+                        SavedQRDetailView(
+                            viewModel: viewModel,
+                            savedCode: selectedCode
+                        )
                     }
                 }
                 .alert(isPresented: $showingDeleteAlert) {
@@ -211,17 +199,14 @@ struct SavedQRCodeList: View {
     @Binding var showingDeleteAlert: Bool
     @Binding var isEditPresented: Bool
     @Binding var selectedQRCode: SavedQRCode?
-    @Binding var showingDetailSheet: Bool
     @State private var pressedQRCode: SavedQRCode? = nil
 
     var body: some View {
         ScrollView {
             LazyVStack(spacing: 16) {
                 ForEach(Array(filteredCodes.enumerated()), id: \.element.id) { index, qrCode in
-                    // Changed from NavigationLink to Button to trigger the bottom sheet
                     Button(action: {
                         selectedQRCode = qrCode
-                        showingDetailSheet = true
                     }) {
                         SavedCodeRow(qrCode: qrCode, isPressed: pressedQRCode?.id == qrCode.id)
                             .offset(x: isEditMode.isEditing ? 20 : 0)

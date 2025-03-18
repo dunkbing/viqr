@@ -11,7 +11,6 @@ import SwiftUI
 struct SavedQRDetailView: View {
     @ObservedObject var viewModel: QRCodeViewModel
     let savedCode: SavedQRCode
-    @Binding var isSheetPresented: Bool
     @State private var showingShareSheet = false
     @State private var showingExportSheet = false
     @State private var exportedFileURL: URL? = nil
@@ -322,10 +321,6 @@ struct SavedQRDetailView: View {
                 }
                 .onEnded { value in
                     withAnimation { isDragging = false }
-                    if value.translation.height > 100 || value.predictedEndTranslation.height > 200
-                    {
-                        isSheetPresented = false
-                    }
                 }
         )
         .onAppear {
@@ -453,7 +448,7 @@ struct SavedQRDetailView: View {
                     ),
                     primaryButton: .destructive(Text("Delete")) {
                         viewModel.deleteSavedQRCode(withID: savedCode.id)
-                        isSheetPresented = false
+                        presentationMode.wrappedValue.dismiss()
                     },
                     secondaryButton: .cancel()
                 )
