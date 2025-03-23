@@ -3,7 +3,7 @@
 //  viqr
 //
 //  Created by Bùi Đặng Bình on 13/3/25.
-//
+//  Updated with Bottom Sheet
 
 import QRCode
 import SwiftUI
@@ -190,45 +190,25 @@ import TikimUI
                     )
                     .padding(.horizontal)
 
-                    Spacer(minLength: 50)
+                    Spacer(minLength: 100)
                 }
             }
             .background(Color.appBackground.ignoresSafeArea())
             .dismissKeyboardOnTap()
             .navigationBarHidden(true)
-            .sheet(isPresented: $showingSaveSheet) {
-                VStack(spacing: 20) {
-                    Text("Save QR Code")
-                        .font(.headline)
-
-                    TextField("QR Code Name", text: $qrCodeName)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .padding(.horizontal)
-
-                    HStack {
-                        Button("Cancel") {
-                            showingSaveSheet = false
-                        }
-                        .foregroundColor(Color.appRed)
-
-                        Spacer()
-
-                        Button("Save") {
+            .overlay(
+                BottomSheetView(isPresented: $showingSaveSheet) {
+                    SaveQRCodeBottomSheet(
+                        isPresented: $showingSaveSheet,
+                        qrCodeName: $qrCodeName,
+                        onSave: {
                             viewModel.saveCurrentQRCode(name: qrCodeName)
                             qrCodeName = ""
-                            showingSaveSheet = false
                         }
-                        .disabled(qrCodeName.isEmpty)
-                        .foregroundColor(Color.appGreen)
-                    }
-                    .padding()
+                    )
                 }
-                .padding()
-                .background(Color.appBackground)
-                .cornerRadius(20)
-            }
+            )
             .sheet(isPresented: $showingExportSheet) {
-                // Export sheet content
                 VStack(spacing: 20) {
                     Text("Export QR Code Image")
                         .font(.headline)
