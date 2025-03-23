@@ -18,11 +18,12 @@ import TikimUI
         @Binding var showingShareSheet: Bool
         @Binding var exportedFileURL: URL?
         let qrDocument: QRCode.Document
-        @FocusState private var isTextFieldFocused: Bool
         @State private var showExportSuccess = false
         @State private var exportSuccessMessage = ""
         @State private var showExportError = false
         @State private var exportErrorMessage = ""
+
+        @State private var cachedQRImage: UIImage? = nil
 
         var body: some View {
             VStack(spacing: 20) {
@@ -31,9 +32,8 @@ import TikimUI
                     .foregroundColor(Color.appText)
                     .padding(.top, 8)
 
-                // QR Code preview
-                if let uiImage = try? qrDocument.uiImage(CGSize(width: 150, height: 150)) {
-                    Image(uiImage: uiImage)
+                if let cachedImage = cachedQRImage {
+                    Image(uiImage: cachedImage)
                         .resizable()
                         .interpolation(.none)
                         .scaledToFit()
@@ -50,7 +50,6 @@ import TikimUI
                         .foregroundColor(Color.appSubtitle)
 
                     TextField("Enter a filename", text: $exportFileName)
-                        .focused($isTextFieldFocused)
                         .padding()
                         .background(Color.appSurface.opacity(0.5))
                         .cornerRadius(12)
@@ -58,12 +57,6 @@ import TikimUI
                             RoundedRectangle(cornerRadius: 12)
                                 .stroke(Color.appAccent.opacity(0.3), lineWidth: 1)
                         )
-                        .onAppear {
-                            // Focus the text field when the sheet appears
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                                isTextFieldFocused = true
-                            }
-                        }
                 }
                 .padding(.horizontal)
 
@@ -134,6 +127,9 @@ import TikimUI
                 .padding(.bottom, 10)
             }
             .padding(.top, 4)
+            .onAppear {
+                generateQRImage()
+            }
             .alert("Export Successful", isPresented: $showExportSuccess) {
                 Button("OK") {
                     isPresented = false
@@ -145,6 +141,18 @@ import TikimUI
                 Button("OK", role: .cancel) {}
             } message: {
                 Text(exportErrorMessage)
+            }
+        }
+
+        private func generateQRImage() {
+            do {
+                // Generate the image once and store it
+                if cachedQRImage == nil {
+                    let imageData = try qrDocument.pngData(dimension: 150)
+                    cachedQRImage = UIImage(data: imageData)
+                }
+            } catch {
+                print("Error generating QR image preview: \(error)")
             }
         }
 
