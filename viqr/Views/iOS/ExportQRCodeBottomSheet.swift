@@ -108,7 +108,7 @@ import TikimUI
                     }
 
                     Button(action: {
-                        exportQRCode()
+                        exportToFiles()
                     }) {
                         Text("Export")
                             .fontWeight(.semibold)
@@ -156,48 +156,10 @@ import TikimUI
             }
         }
 
-        private func exportQRCode() {
-            if selectedExportFormat == .png {
-                // Export to Photos
-                exportToPNG()
-            } else {
-                // Export to Files
-                exportToFiles()
-            }
-        }
-
-        private func exportToPNG() {
-            // Request permission to access Photos
-            PHPhotoLibrary.requestAuthorization { status in
-                DispatchQueue.main.async {
-                    if status == .authorized {
-                        do {
-                            let imageData = try qrDocument.pngData(dimension: 1024)
-                            let imageWrapped = UIImage(data: imageData)
-                            if let image = imageWrapped {
-                                UIImageWriteToSavedPhotosAlbum(image, nil, nil, nil)
-                                exportSuccessMessage =
-                                    "QR Code has been saved to your Photos library"
-                                showExportSuccess = true
-                            } else {
-                                exportErrorMessage = "Failed to create image data"
-                                showExportError = true
-                            }
-                        } catch {
-                            exportErrorMessage = "Error: \(error.localizedDescription)"
-                            showExportError = true
-                        }
-                    } else {
-                        exportErrorMessage = "Permission denied to access Photos"
-                        showExportError = true
-                    }
-                }
-            }
-        }
-
         private func exportToFiles() {
             do {
                 var data: Data?
+                print("data \(selectedExportFormat)")
 
                 switch selectedExportFormat {
                 case .svg:
@@ -211,12 +173,11 @@ import TikimUI
                 if let data = data {
                     let fileName = exportFileName.isEmpty ? "QRCode" : exportFileName
                     let tempDir = FileManager.default.temporaryDirectory
-                    let fileURL = tempDir.appendingPathComponent(fileName).appendingPathExtension(
-                        selectedExportFormat.fileExtension)
+                    let fileURL = tempDir.appendingPathComponent(fileName)
+                        .appendingPathExtension(selectedExportFormat.fileExtension)
 
                     try data.write(to: fileURL)
                     exportedFileURL = fileURL
-                    isPresented = false
                     showingShareSheet = true
                 }
             } catch {

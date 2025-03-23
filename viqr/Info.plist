@@ -2,10 +2,6 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>NSPhotoLibraryAddUsageDescription</key>
-	<string>We need permission to save QR code images to your photo library when you export them as PNG.</string>
-	<key>NSPhotoLibraryUsageDescription</key>
-	<string>We need access to your photo library to save QR code images when you export them as PNG.</string>
 	<key>com.apple.security.device.wifi</key>
 	<true/>
 	<key>NSLocationTemporaryUsageDescriptionDictionary</key>
