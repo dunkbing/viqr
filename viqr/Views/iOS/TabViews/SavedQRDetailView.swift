@@ -22,26 +22,13 @@ struct SavedQRDetailView: View {
     @State private var contentAppeared = false
     @State private var showCopiedFeedback = false
 
-    // State for handling manual dismissal
     @GestureState private var dragOffset: CGFloat = 0
     @State private var isDragging = false
 
     var body: some View {
         VStack(spacing: 0) {
-            // Handle area with drag indicator
-            HStack {
-                Spacer()
-                Capsule()
-                    .fill(Color.appSurface2)
-                    .frame(width: 40, height: 5)
-                Spacer()
-            }
-            .padding(.vertical, 12)
-            .contentShape(Rectangle())
-
             ScrollView {
                 VStack(spacing: 24) {
-                    // Header with QR Code name
                     Text(savedCode.name)
                         .font(.title2)
                         .fontWeight(.bold)
@@ -50,9 +37,7 @@ struct SavedQRDetailView: View {
                         .opacity(contentAppeared ? 1 : 0)
                         .offset(y: contentAppeared ? 0 : 20)
 
-                    // QR Code metadata
                     HStack(spacing: 12) {
-                        // Type badge
                         HStack(spacing: 6) {
                             Image(systemName: savedCode.content.typeEnum.icon)
                                 .font(.system(size: 14))
@@ -65,7 +50,6 @@ struct SavedQRDetailView: View {
                         .foregroundColor(Color.appAccent)
                         .cornerRadius(8)
 
-                        // Date badge
                         HStack(spacing: 6) {
                             Image(systemName: "calendar")
                                 .font(.system(size: 14))
@@ -81,7 +65,6 @@ struct SavedQRDetailView: View {
                     .opacity(contentAppeared ? 1 : 0)
                     .offset(y: contentAppeared ? 0 : 20)
 
-                    // QR Code Content Card
                     VStack(alignment: .leading, spacing: 12) {
                         HStack {
                             Text("Content")
@@ -141,7 +124,6 @@ struct SavedQRDetailView: View {
 
                     // QR Code image
                     ZStack {
-                        // Background pattern for QR Code
                         VStack(spacing: 2) {
                             ForEach(0..<10) { _ in
                                 HStack(spacing: 2) {
@@ -305,6 +287,7 @@ struct SavedQRDetailView: View {
                 .padding(.horizontal, 24)
                 .padding(.bottom, 32)
             }
+            .padding(.top, 12)
         }
         .background(Color.appBackground)
         .offset(y: max(0, dragOffset))
