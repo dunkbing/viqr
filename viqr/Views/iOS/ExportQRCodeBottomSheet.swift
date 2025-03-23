@@ -8,6 +8,7 @@
 import Photos
 import QRCode
 import SwiftUI
+import TikimUI
 
 #if os(iOS)
     struct ExportQRCodeBottomSheet: View {
@@ -66,19 +67,20 @@ import SwiftUI
                 }
                 .padding(.horizontal)
 
-                // Format picker
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Format")
                         .font(.subheadline)
                         .foregroundColor(Color.appSubtitle)
                         .padding(.horizontal)
 
-                    Picker("Format", selection: $selectedExportFormat) {
-                        Text("PNG").tag(QRCodeExportFormat.png)
-                        Text("SVG").tag(QRCodeExportFormat.svg)
-                        Text("PDF").tag(QRCodeExportFormat.pdf)
-                    }
-                    .pickerStyle(SegmentedPickerStyle())
+                    TabPickerView(
+                        selection: $selectedExportFormat,
+                        options: [
+                            (value: QRCodeExportFormat.png, title: "PNG"),
+                            (value: QRCodeExportFormat.svg, title: "SVG"),
+                            (value: QRCodeExportFormat.pdf, title: "PDF")
+                        ]
+                    )
                     .padding(.horizontal)
                 }
 
