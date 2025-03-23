@@ -38,13 +38,22 @@ import TikimUI
                     .tag(1)
 
                     NavigationView {
-                        SettingsTabView(viewModel: viewModel)
+                        QRScanTabView(viewModel: viewModel)
                             .environmentObject(themeManager)
                             .onAppear { showTabBar = true }
                             .navigationBarTitleDisplayMode(.inline)
                     }
                     .navigationViewStyle(StackNavigationViewStyle())
                     .tag(2)
+
+                    NavigationView {
+                        SettingsTabView(viewModel: viewModel)
+                            .environmentObject(themeManager)
+                            .onAppear { showTabBar = true }
+                            .navigationBarTitleDisplayMode(.inline)
+                    }
+                    .navigationViewStyle(StackNavigationViewStyle())
+                    .tag(3)
                 }
                 .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
                 .edgesIgnoringSafeArea(.bottom)
@@ -56,6 +65,7 @@ import TikimUI
                         items: [
                             (icon: "qrcode", title: "Create"),
                             (icon: "folder", title: "Saved"),
+                            (icon: "qrcode.viewfinder", title: "Scan"),
                             (icon: "gear", title: "Settings"),
                         ]
                     )

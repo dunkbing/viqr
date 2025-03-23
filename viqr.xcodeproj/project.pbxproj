@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		C352C8082D82A927005C5632 /* QRCode in Frameworks */ = {isa = PBXBuildFile; productRef = C352C8072D82A927005C5632 /* QRCode */; };
 		C3603A822D8569E6009DBE91 /* TikimUI in Frameworks */ = {isa = PBXBuildFile; productRef = C3603A812D8569E6009DBE91 /* TikimUI */; };
+		C3C22C562D9079D100E19CD2 /* CodeScanner in Frameworks */ = {isa = PBXBuildFile; productRef = C3C22C552D9079D100E19CD2 /* CodeScanner */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -56,6 +57,7 @@
 			files = (
 				C3603A822D8569E6009DBE91 /* TikimUI in Frameworks */,
 				C352C8082D82A927005C5632 /* QRCode in Frameworks */,
+				C3C22C562D9079D100E19CD2 /* CodeScanner in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -109,6 +111,7 @@
 			packageProductDependencies = (
 				C352C8072D82A927005C5632 /* QRCode */,
 				C3603A812D8569E6009DBE91 /* TikimUI */,
+				C3C22C552D9079D100E19CD2 /* CodeScanner */,
 			);
 			productName = viqr;
 			productReference = C350196E2D82A415000F56B2 /* viqr.app */;
@@ -141,6 +144,7 @@
 			packageReferences = (
 				C35019992D82A6AC000F56B2 /* XCRemoteSwiftPackageReference "QRCode" */,
 				C3603A802D8569E6009DBE91 /* XCLocalSwiftPackageReference "../TikimUI" */,
+				C3C22C542D9079D100E19CD2 /* XCRemoteSwiftPackageReference "CodeScanner" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = C350196F2D82A415000F56B2 /* Products */;
@@ -408,6 +412,14 @@
 				minimumVersion = 26.1.0;
 			};
 		};
+		C3C22C542D9079D100E19CD2 /* XCRemoteSwiftPackageReference "CodeScanner" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/twostraws/CodeScanner";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.5.2;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -419,6 +431,11 @@
 		C3603A812D8569E6009DBE91 /* TikimUI */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = TikimUI;
+		};
+		C3C22C552D9079D100E19CD2 /* CodeScanner */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C3C22C542D9079D100E19CD2 /* XCRemoteSwiftPackageReference "CodeScanner" */;
+			productName = CodeScanner;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
