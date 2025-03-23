@@ -5,6 +5,7 @@
 //  Created by Bùi Đặng Bình on 23/3/25.
 //
 
+import Photos
 import QRCode
 import SwiftUI
 
@@ -17,6 +18,10 @@ import SwiftUI
         @Binding var exportedFileURL: URL?
         let qrDocument: QRCode.Document
         @FocusState private var isTextFieldFocused: Bool
+        @State private var showExportSuccess = false
+        @State private var exportSuccessMessage = ""
+        @State private var showExportError = false
+        @State private var exportErrorMessage = ""
 
         var body: some View {
             VStack(spacing: 20) {
@@ -77,6 +82,22 @@ import SwiftUI
                     .padding(.horizontal)
                 }
 
+                // Export destination info
+                HStack {
+                    Image(systemName: selectedExportFormat == .png ? "photo" : "folder")
+                        .foregroundColor(Color.appSubtitle)
+
+                    Text(
+                        selectedExportFormat == .png ? "Will save to Photos" : "Will save to Files"
+                    )
+                    .font(.caption)
+                    .foregroundColor(Color.appSubtitle)
+
+                    Spacer()
+                }
+                .padding(.horizontal)
+                .padding(.top, -4)
+
                 // Action buttons
                 HStack(spacing: 16) {
                     Button(action: {
@@ -92,16 +113,7 @@ import SwiftUI
                     }
 
                     Button(action: {
-                        exportedFileURL = QRCodeGenerator.saveQRCodeToFile(
-                            qrCode: qrDocument,
-                            fileName: exportFileName,
-                            fileFormat: selectedExportFormat
-                        )
-
-                        if exportedFileURL != nil {
-                            isPresented = false
-                            showingShareSheet = true
-                        }
+                        exportQRCode()
                     }) {
                         Text("Export")
                             .fontWeight(.semibold)
@@ -120,6 +132,87 @@ import SwiftUI
                 .padding(.bottom, 10)
             }
             .padding(.top, 4)
+            .alert("Export Successful", isPresented: $showExportSuccess) {
+                Button("OK") {
+                    isPresented = false
+                }
+            } message: {
+                Text(exportSuccessMessage)
+            }
+            .alert("Export Failed", isPresented: $showExportError) {
+                Button("OK", role: .cancel) {}
+            } message: {
+                Text(exportErrorMessage)
+            }
+        }
+
+        private func exportQRCode() {
+            if selectedExportFormat == .png {
+                // Export to Photos
+                exportToPNG()
+            } else {
+                // Export to Files
+                exportToFiles()
+            }
+        }
+
+        private func exportToPNG() {
+            // Request permission to access Photos
+            PHPhotoLibrary.requestAuthorization { status in
+                DispatchQueue.main.async {
+                    if status == .authorized {
+                        do {
+                            let imageData = try qrDocument.pngData(dimension: 1024)
+                            let imageWrapped = UIImage(data: imageData)
+                            if let image = imageWrapped {
+                                UIImageWriteToSavedPhotosAlbum(image, nil, nil, nil)
+                                exportSuccessMessage =
+                                    "QR Code has been saved to your Photos library"
+                                showExportSuccess = true
+                            } else {
+                                exportErrorMessage = "Failed to create image data"
+                                showExportError = true
+                            }
+                        } catch {
+                            exportErrorMessage = "Error: \(error.localizedDescription)"
+                            showExportError = true
+                        }
+                    } else {
+                        exportErrorMessage = "Permission denied to access Photos"
+                        showExportError = true
+                    }
+                }
+            }
+        }
+
+        private func exportToFiles() {
+            do {
+                var data: Data?
+
+                switch selectedExportFormat {
+                case .svg:
+                    data = try qrDocument.svgData(dimension: 1024)
+                case .pdf:
+                    data = try qrDocument.pdfData(dimension: 1024)
+                case .png:
+                    data = try qrDocument.pngData(dimension: 1024)
+                }
+
+                if let data = data {
+                    let fileName = exportFileName.isEmpty ? "QRCode" : exportFileName
+                    let tempDir = FileManager.default.temporaryDirectory
+                    let fileURL = tempDir.appendingPathComponent(fileName).appendingPathExtension(
+                        selectedExportFormat.fileExtension)
+
+                    try data.write(to: fileURL)
+                    exportedFileURL = fileURL
+                    isPresented = false
+                    showingShareSheet = true
+                }
+            } catch {
+                exportErrorMessage = "Error: \(error.localizedDescription)"
+                showExportError = true
+            }
         }
     }
 #endif

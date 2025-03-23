@@ -86,11 +86,19 @@ struct QRCodeGenerator {
     static func saveQRCodeToFile(
         qrCode: QRCode.Document, fileName: String, fileFormat: QRCodeExportFormat
     ) -> URL? {
-        let paths = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
-        guard let documentsDirectory = paths.first else { return nil }
-
-        let fileURL = documentsDirectory.appendingPathComponent(fileName).appendingPathExtension(
-            fileFormat.fileExtension)
+        // For iOS, use the temporary directory for exporting files to be shared
+        #if os(iOS)
+            let tempDir = FileManager.default.temporaryDirectory
+            let fileURL = tempDir.appendingPathComponent(fileName).appendingPathExtension(
+                fileFormat.fileExtension)
+        #else
+            // For macOS, use the documents directory
+            let paths = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
+            guard let documentsDirectory = paths.first else { return nil }
+            let fileURL = documentsDirectory.appendingPathComponent(fileName)
+                .appendingPathExtension(
+                    fileFormat.fileExtension)
+        #endif
 
         do {
             var data: Data?

@@ -52,49 +52,18 @@ struct QRCodePreviewView: View {
             }
             .padding(.vertical, 5)
             .sheet(isPresented: $showingExportSheet) {
-                VStack(spacing: 20) {
-                    Text("Export QR Code Image")
-                        .font(.headline)
-
-                    // Preview
-                    let qrDocument = viewModel.generateQRCode()
-                    if let uiImage = (try? qrDocument.uiImage(CGSize(width: 150, height: 150))) {
-                        Image(uiImage: uiImage)
-                            .resizable()
-                            .interpolation(.none)
-                            .scaledToFit()
-                            .frame(width: 150, height: 150)
-                            .background(Color.white)
-                            .cornerRadius(10)
-                            .shadow(radius: 2)
-                    }
-
-                    // Filename field
-                    TextField("Filename", text: $exportFileName)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .padding(.horizontal)
-
-                    HStack {
-                        Button("Cancel") {
-                            showingExportSheet = false
-                        }
-                        .foregroundColor(.red)
-
-                        Spacer()
-
-                        Button("Export") {
-                            exportedFileURL = viewModel.exportQRCode(
-                                as: selectedExportFormat, named: exportFileName)
-                            if exportedFileURL != nil {
-                                showingExportSheet = false
-                                showingShareSheet = true
-                            }
-                        }
-                        .disabled(exportFileName.isEmpty)
-                    }
-                    .padding()
+                ZStack {
+                    Color.appBackground.ignoresSafeArea()
+                    ExportQRCodeBottomSheet(
+                        isPresented: $showingExportSheet,
+                        exportFileName: $exportFileName,
+                        selectedExportFormat: $selectedExportFormat,
+                        showingShareSheet: $showingShareSheet,
+                        exportedFileURL: $exportedFileURL,
+                        qrDocument: viewModel.generateQRCode()
+                    )
+                    .background(Color.appBackground)
                 }
-                .padding()
             }
             .sheet(isPresented: $showingShareSheet) {
                 if let url = exportedFileURL {
