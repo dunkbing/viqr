@@ -91,7 +91,6 @@ import TikimUI
         var body: some View {
             KeyboardAwareScrollView {
                 VStack(spacing: 20) {
-                    // Header based on mode
                     HStack {
                         Text(isEditMode ? "Edit QR Code" : "Create QR Code")
                             .font(.title2)
@@ -189,7 +188,7 @@ import TikimUI
                     )
                     .padding(.horizontal)
 
-                    Spacer(minLength: 50)
+                    Spacer(minLength: 100)
                 }
             }
             .background(Color.appBackground.ignoresSafeArea())
@@ -226,7 +225,6 @@ import TikimUI
             }
             .onAppear {
                 if isEditMode, let originalQRCode = originalQRCode {
-                    // Load the QR code data for editing
                     viewModel.loadSavedQRCode(originalQRCode)
                 }
             }
@@ -237,13 +235,11 @@ import TikimUI
         private func saveEditedQRCode() {
             guard let originalQRCode = originalQRCode else { return }
 
-            // Update the saved QR code with the current values
             viewModel.updateSavedQRCode(
                 originalID: originalQRCode.id,
                 name: editedQRCodeName.isEmpty ? originalQRCode.name : editedQRCodeName
             )
 
-            // Dismiss the view
             presentationMode.wrappedValue.dismiss()
         }
 
