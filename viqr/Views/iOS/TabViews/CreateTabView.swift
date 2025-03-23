@@ -63,7 +63,6 @@ import TikimUI
         @State private var qrCodeName = ""
         @State private var selectedExportFormat: QRCodeExportFormat = .png
         @State private var exportFileName = ""
-        @State private var showingShareSheet = false
         @State private var exportedFileURL: URL? = nil
         @State private var selectedTab = 0
 
@@ -212,17 +211,11 @@ import TikimUI
                         isPresented: $showingExportSheet,
                         exportFileName: $exportFileName,
                         selectedExportFormat: $selectedExportFormat,
-                        showingShareSheet: $showingShareSheet,
                         exportedFileURL: $exportedFileURL,
                         qrDocument: viewModel.generateQRCode()
                     )
                 }
             )
-            .sheet(isPresented: $showingShareSheet) {
-                if let url = exportedFileURL {
-                    ShareSheet(items: [url])
-                }
-            }
             .onAppear {
                 if isEditMode, let originalQRCode = originalQRCode {
                     viewModel.loadSavedQRCode(originalQRCode)

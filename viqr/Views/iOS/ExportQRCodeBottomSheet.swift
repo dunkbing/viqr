@@ -15,7 +15,6 @@ import TikimUI
         @Binding var isPresented: Bool
         @Binding var exportFileName: String
         @Binding var selectedExportFormat: QRCodeExportFormat
-        @Binding var showingShareSheet: Bool
         @Binding var exportedFileURL: URL?
         let qrDocument: QRCode.Document
         @State private var showExportSuccess = false
@@ -71,7 +70,7 @@ import TikimUI
                         options: [
                             (value: QRCodeExportFormat.png, title: "PNG"),
                             (value: QRCodeExportFormat.svg, title: "SVG"),
-                            (value: QRCodeExportFormat.pdf, title: "PDF")
+                            (value: QRCodeExportFormat.pdf, title: "PDF"),
                         ]
                     )
                     .padding(.horizontal)
@@ -156,10 +155,10 @@ import TikimUI
             }
         }
 
+        // In ExportQRCodeBottomSheet.swift
         private func exportToFiles() {
             do {
                 var data: Data?
-                print("data \(selectedExportFormat)")
 
                 switch selectedExportFormat {
                 case .svg:
@@ -177,13 +176,45 @@ import TikimUI
                         .appendingPathExtension(selectedExportFormat.fileExtension)
 
                     try data.write(to: fileURL)
-                    exportedFileURL = fileURL
-                    showingShareSheet = true
+
+                    // Use UIKit's activity view controller directly
+                    presentShareSheet(with: fileURL)
                 }
             } catch {
                 exportErrorMessage = "Error: \(error.localizedDescription)"
                 showExportError = true
             }
+        }
+
+        private func presentShareSheet(with url: URL) {
+            guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+                let rootViewController = windowScene.windows.first?.rootViewController
+            else {
+                print("Could not find root view controller")
+                return
+            }
+
+            // Create the activity view controller
+            let activityViewController = UIActivityViewController(
+                activityItems: [url],
+                applicationActivities: nil
+            )
+
+            // Present it
+            activityViewController.completionWithItemsHandler = { _, _, _, _ in
+                // Clean up after sharing is done
+            }
+
+            // For iPad, set the sourceView and sourceRect to prevent app crash
+            if let popoverController = activityViewController.popoverPresentationController {
+                popoverController.sourceView = rootViewController.view
+                popoverController.sourceRect = CGRect(
+                    x: UIScreen.main.bounds.width / 2, y: UIScreen.main.bounds.height / 2, width: 0,
+                    height: 0)
+                popoverController.permittedArrowDirections = []
+            }
+
+            rootViewController.present(activityViewController, animated: true)
         }
     }
 #endif

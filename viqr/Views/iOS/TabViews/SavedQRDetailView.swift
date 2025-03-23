@@ -11,7 +11,6 @@ import SwiftUI
 struct SavedQRDetailView: View {
     @ObservedObject var viewModel: QRCodeViewModel
     let savedCode: SavedQRCode
-    @State private var showingShareSheet = false
     @State private var showingExportSheet = false
     @State private var exportedFileURL: URL? = nil
     @State private var selectedExportFormat: QRCodeExportFormat = .png
@@ -334,18 +333,12 @@ struct SavedQRDetailView: View {
                         isPresented: $showingExportSheet,
                         exportFileName: $exportFileName,
                         selectedExportFormat: $selectedExportFormat,
-                        showingShareSheet: $showingShareSheet,
                         exportedFileURL: $exportedFileURL,
                         qrDocument: QRCodeGenerator.generateQRCode(
                             from: savedCode.content, with: savedCode.style)
                     )
                 }
             )
-            .sheet(isPresented: $showingShareSheet) {
-                if let url = exportedFileURL {
-                    ShareSheet(items: [url])
-                }
-            }
             .alert(isPresented: $showingDeleteAlert) {
                 Alert(
                     title: Text("Delete QR Code"),

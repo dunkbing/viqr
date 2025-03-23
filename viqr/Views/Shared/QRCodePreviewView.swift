@@ -17,7 +17,6 @@ struct QRCodePreviewView: View {
     @State private var selectedExportFormat: QRCodeExportFormat = .png
     @State private var exportFileName: String = "QRCode"
     @State private var showingExportSheet = false
-    @State private var showingShareSheet = false
     @State private var exportedFileURL: URL? = nil
 
     var body: some View {
@@ -58,16 +57,10 @@ struct QRCodePreviewView: View {
                         isPresented: $showingExportSheet,
                         exportFileName: $exportFileName,
                         selectedExportFormat: $selectedExportFormat,
-                        showingShareSheet: $showingShareSheet,
                         exportedFileURL: $exportedFileURL,
                         qrDocument: viewModel.generateQRCode()
                     )
                     .background(Color.appBackground)
-                }
-            }
-            .sheet(isPresented: $showingShareSheet) {
-                if let url = exportedFileURL {
-                    ShareSheet(items: [url])
                 }
             }
         #elseif os(macOS)
