@@ -3,7 +3,6 @@
 //  viqr
 //
 //  Created by Bùi Đặng Bình on 13/3/25.
-//  Updated with Bottom Sheet
 
 import QRCode
 import SwiftUI
@@ -190,7 +189,7 @@ import TikimUI
                     )
                     .padding(.horizontal)
 
-                    Spacer(minLength: 100)
+                    Spacer(minLength: 50)
                 }
             }
             .background(Color.appBackground.ignoresSafeArea())
@@ -208,62 +207,18 @@ import TikimUI
                     )
                 }
             )
-            .sheet(isPresented: $showingExportSheet) {
-                VStack(spacing: 20) {
-                    Text("Export QR Code Image")
-                        .font(.headline)
-
-                    // Preview
-                    let qrDocument = viewModel.generateQRCode()
-
-                    if let uiImage = try? qrDocument.uiImage(CGSize(width: 150, height: 150)) {
-                        Image(uiImage: uiImage)
-                            .resizable()
-                            .interpolation(.none)
-                            .scaledToFit()
-                            .frame(width: 150, height: 150)
-                            .background(Color.white)
-                            .cornerRadius(10)
-                            .shadow(radius: 2)
-                    }
-
-                    // Filename field
-                    TextField("Filename", text: $exportFileName)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .padding(.horizontal)
-
-                    // Format picker
-                    Picker("Format", selection: $selectedExportFormat) {
-                        Text("PNG").tag(QRCodeExportFormat.png)
-                        Text("SVG").tag(QRCodeExportFormat.svg)
-                        Text("PDF").tag(QRCodeExportFormat.pdf)
-                    }
-                    .pickerStyle(SegmentedPickerStyle())
-                    .padding(.horizontal)
-
-                    HStack {
-                        Button("Cancel") {
-                            showingExportSheet = false
-                        }
-                        .foregroundColor(Color.appRed)
-
-                        Spacer()
-
-                        Button("Export") {
-                            exportedFileURL = viewModel.exportQRCode(
-                                as: selectedExportFormat, named: exportFileName)
-                            if exportedFileURL != nil {
-                                showingExportSheet = false
-                                showingShareSheet = true
-                            }
-                        }
-                        .disabled(exportFileName.isEmpty)
-                        .foregroundColor(Color.appGreen)
-                    }
-                    .padding()
+            .overlay(
+                BottomSheetView(isPresented: $showingExportSheet) {
+                    ExportQRCodeBottomSheet(
+                        isPresented: $showingExportSheet,
+                        exportFileName: $exportFileName,
+                        selectedExportFormat: $selectedExportFormat,
+                        showingShareSheet: $showingShareSheet,
+                        exportedFileURL: $exportedFileURL,
+                        qrDocument: viewModel.generateQRCode()
+                    )
                 }
-                .padding()
-            }
+            )
             .sheet(isPresented: $showingShareSheet) {
                 if let url = exportedFileURL {
                     ShareSheet(items: [url])

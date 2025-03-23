@@ -345,96 +345,19 @@ struct SavedQRDetailView: View {
                 }
                 .accentColor(Color.appAccent)  // Apply accent color to navigation bar
             }
-            .sheet(isPresented: $showingExportSheet) {
-                VStack(spacing: 20) {
-                    // Sheet header with handle indicator
-                    Capsule()
-                    .fill(Color.appSurface2)
-                    .frame(width: 40, height: 5)
-                    .padding(.top, 8)
-
-                    Text("Export QR Code Image")
-                    .font(.headline)
-                    .foregroundColor(Color.appText)
-
-                    // Preview of the QR code
-                    let qrDocument = QRCodeGenerator.generateQRCode(
-                        from: savedCode.content, with: savedCode.style)
-                    if let uiImage = try? qrDocument.uiImage(CGSize(width: 150, height: 150)) {
-                        Image(uiImage: uiImage)
-                        .resizable()
-                        .interpolation(.none)
-                        .scaledToFit()
-                        .frame(width: 150, height: 150)
-                        .background(Color.white)
-                        .cornerRadius(10)
-                        .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
-                    }
-
-                    // Filename field
-                    TextField("Filename", text: $exportFileName)
-                    .padding()
-                    .background(Color.appSurface.opacity(0.5))
-                    .cornerRadius(10)
-                    .padding(.horizontal)
-
-                    // Format picker
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Format")
-                        .font(.subheadline)
-                        .foregroundColor(Color.appSubtitle)
-                        .padding(.horizontal)
-
-                        Picker("Format", selection: $selectedExportFormat) {
-                            Text("PNG").tag(QRCodeExportFormat.png)
-                            Text("SVG").tag(QRCodeExportFormat.svg)
-                            Text("PDF").tag(QRCodeExportFormat.pdf)
-                        }
-                        .pickerStyle(SegmentedPickerStyle())
-                        .padding(.horizontal)
-                    }
-
-                    // Action buttons
-                    HStack {
-                        Button(action: {
-                            showingExportSheet = false
-                        }) {
-                            Text("Cancel")
-                            .fontWeight(.medium)
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 14)
-                            .background(Color.appRed.opacity(0.1))
-                            .foregroundColor(Color.appRed)
-                            .cornerRadius(12)
-                        }
-
-                        Button(action: {
-                            exportedFileURL = QRCodeGenerator.saveQRCodeToFile(
-                                qrCode: qrDocument,
-                                fileName: exportFileName,
-                                fileFormat: selectedExportFormat
-                            )
-
-                            if exportedFileURL != nil {
-                                showingExportSheet = false
-                                showingShareSheet = true
-                            }
-                        }) {
-                            Text("Export")
-                            .fontWeight(.medium)
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 14)
-                            .background(Color.appGreen)
-                            .foregroundColor(.white)
-                            .cornerRadius(12)
-                        }
-                        .disabled(exportFileName.isEmpty)
-                    }
-                    .padding()
+            .overlay(
+                BottomSheetView(isPresented: $showingExportSheet) {
+                    ExportQRCodeBottomSheet(
+                        isPresented: $showingExportSheet,
+                        exportFileName: $exportFileName,
+                        selectedExportFormat: $selectedExportFormat,
+                        showingShareSheet: $showingShareSheet,
+                        exportedFileURL: $exportedFileURL,
+                        qrDocument: QRCodeGenerator.generateQRCode(
+                            from: savedCode.content, with: savedCode.style)
+                    )
                 }
-                .padding(.bottom)
-                .background(Color.appBackground)
-            }
+            )
             .sheet(isPresented: $showingShareSheet) {
                 if let url = exportedFileURL {
                     ShareSheet(items: [url])
