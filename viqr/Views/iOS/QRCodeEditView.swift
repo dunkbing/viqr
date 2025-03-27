@@ -115,7 +115,6 @@ import TikimUI
                         )
                         .padding(.horizontal)
 
-                        // Action Buttons
                         HStack(spacing: 15) {
                             Button(action: {
                                 isPresented = false
@@ -158,41 +157,6 @@ import TikimUI
             .navigationBarHidden(true)
             .navigationBarTitleDisplayMode(.inline)
             .dismissKeyboardOnTap()
-            .overlay(
-                VStack {
-                    HStack {
-                        DismissButton(isPresented: $isPresented, label: "Cancel")
-
-                        Spacer()
-
-                        Button(action: {
-                            if qrCodeName.isEmpty {
-                                showSaveConfirmation = true
-                            } else {
-                                saveChanges()
-                            }
-                        }) {
-                            Text("Save")
-                                .fontWeight(.semibold)
-                                .padding(.vertical, 8)
-                                .padding(.horizontal, 16)
-                                .background(Color.appGreen.opacity(0.2))
-                                .foregroundColor(Color.appGreen)
-                                .cornerRadius(10)
-                        }
-                    }
-                    .padding()
-                    .background(
-                        Rectangle()
-                            .fill(Color.appBackground.opacity(0.98))
-                            .shadow(color: Color.black.opacity(0.05), radius: 3, y: 1)
-                    )
-
-                    Spacer()
-                }
-                .ignoresSafeArea()
-                .frame(height: 80)
-            )
             .alert("Missing QR Code Name", isPresented: $showSaveConfirmation) {
                 Button("Cancel", role: .cancel) {}
                 Button("Continue") {
