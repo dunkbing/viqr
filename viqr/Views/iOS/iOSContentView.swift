@@ -15,6 +15,7 @@ import TikimUI
         @State private var selectedTab = 0
         @State private var previousTab = 0
         @State private var showTabBar = true
+        @State private var isScannerActive = false
 
         var body: some View {
             ZStack(alignment: .bottom) {
@@ -38,10 +39,21 @@ import TikimUI
                     .tag(1)
 
                     NavigationView {
-                        QRScanTabView(viewModel: viewModel)
-                            .environmentObject(themeManager)
-                            .onAppear { showTabBar = true }
-                            .navigationBarTitleDisplayMode(.inline)
+                        QRScanTabView(
+                            viewModel: viewModel,
+                            isScannerActive: $isScannerActive
+                        )
+                        .environmentObject(themeManager)
+                        .onAppear {
+                            showTabBar = true
+                            isScannerActive = selectedTab == 2
+                        }
+                        .onDisappear {
+                            if selectedTab != 2 {
+                                isScannerActive = false
+                            }
+                        }
+                        .navigationBarTitleDisplayMode(.inline)
                     }
                     .navigationViewStyle(StackNavigationViewStyle())
                     .tag(2)
@@ -84,6 +96,7 @@ import TikimUI
                 if newTab == 0 && previousTab != newTab {
                     viewModel.resetForNewQRCode()
                 }
+                isScannerActive = newTab == 2
                 previousTab = newTab
             }
         }

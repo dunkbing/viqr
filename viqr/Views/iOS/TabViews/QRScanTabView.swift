@@ -12,6 +12,8 @@ import TikimUI
 #if os(iOS)
     struct QRScanTabView: View {
         @ObservedObject var viewModel: QRCodeViewModel
+        @Binding var isScannerActive: Bool
+
         @State private var isShowingScanner = true
         @State private var scannedCode: String? = nil
         @State private var showSaveDialog = false
@@ -55,7 +57,7 @@ import TikimUI
 
                     // Scanner view
                     ZStack {
-                        if isShowingScanner {
+                        if isShowingScanner && isScannerActive {
                             CodeScannerView(
                                 codeTypes: [.qr, .ean8, .ean13, .pdf417, .aztec, .code128],
                                 scanMode: .continuous,
@@ -137,7 +139,6 @@ import TikimUI
                         saveScannedQRCode()
                     },
                     onCancel: {
-                        // Reset and continue scanning
                         scannedCode = nil
                         isShowingScanner = true
                     }
@@ -150,7 +151,6 @@ import TikimUI
                     savedCode: saved
                 )
                 .onDisappear {
-                    // Resume scanning after viewing details
                     scannedCode = nil
                     isShowingScanner = true
                 }
